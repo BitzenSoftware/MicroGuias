@@ -1,0 +1,59 @@
+import Image from 'next/image'
+import Link from 'next/link'
+import type { Ebook } from '@/lib/types'
+import { formatPreco } from '@/lib/utils'
+
+export function EbookCard({ ebook }: { ebook: Ebook }) {
+  const categoria = ebook.loja_categorias
+
+  return (
+    <Link href={`/ebook/${ebook.slug}`} className="group block">
+      <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-100 hover:border-indigo-100">
+        {/* Capa */}
+        <div className="relative aspect-[3/4] bg-gradient-to-br from-indigo-50 to-purple-50">
+          {ebook.capa_url ? (
+            <Image
+              src={ebook.capa_url}
+              alt={ebook.titulo}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-5xl">📖</span>
+            </div>
+          )}
+
+          {categoria && (
+            <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-600 px-2.5 py-1 rounded-full shadow-sm">
+              {categoria.icone_emoji} {categoria.nome}
+            </span>
+          )}
+        </div>
+
+        {/* Informações */}
+        <div className="p-4">
+          <h3 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
+            {ebook.titulo}
+          </h3>
+
+          {ebook.descricao_curta && (
+            <p className="text-xs text-gray-400 mt-1.5 line-clamp-2">
+              {ebook.descricao_curta}
+            </p>
+          )}
+
+          <div className="mt-3 flex items-center justify-between">
+            <span className="text-base font-bold text-indigo-600">
+              {formatPreco(ebook.preco_centavos)}
+            </span>
+            <span className="text-xs text-indigo-500 font-medium group-hover:translate-x-0.5 transition-transform">
+              Ver →
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  )
+}
