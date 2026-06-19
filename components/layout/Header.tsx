@@ -10,8 +10,8 @@ export function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-            <Link href="/" className="hover:text-indigo-600 transition-colors">
-              Início
+            <Link href="/login" className="hover:text-indigo-600 transition-colors">
+              Entrar
             </Link>
           </nav>
 
