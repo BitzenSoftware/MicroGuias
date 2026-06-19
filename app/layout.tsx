@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" className={geist.variable}>
       <body className="bg-gray-50 min-h-screen antialiased font-[family-name:var(--font-geist)]">
         <Header />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-8">
           {children}
         </main>
         <footer className="border-t border-gray-200 mt-16 py-8 text-center text-sm text-gray-400">

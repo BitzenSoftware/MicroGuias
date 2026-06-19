@@ -64,7 +64,7 @@ export default async function CategoriaPage({
       <CategoryFilter categorias={categorias ?? []} categoriaAtiva={slug} />
 
       {ebooks && ebooks.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 sm:gap-6">
           {ebooks.map((ebook) => (
             <EbookCard key={ebook.id} ebook={ebook as Ebook} />
           ))}
