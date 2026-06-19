@@ -5,13 +5,15 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
-export default function LoginPage() {
+export default function CadastroPage() {
   const router = useRouter()
   const supabase = createClient()
 
+  const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState<string | null>(null)
+  const [sucesso, setSucesso] = useState(false)
   const [carregando, setCarregando] = useState(false)
 
   async function handleGoogle() {
@@ -21,43 +23,60 @@ export default function LoginPage() {
     })
   }
 
-  async function handleLogin(e: { preventDefault(): void }) {
+  async function handleCadastro(e: { preventDefault(): void }) {
     e.preventDefault()
     setErro(null)
     setCarregando(true)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
+    const { error } = await supabase.auth.signUp({
+      email,
+      password: senha,
+      options: { data: { full_name: nome } },
+    })
+
+    setCarregando(false)
 
     if (error) {
-      setCarregando(false)
-      setErro('Email ou senha inválidos.')
+      setErro(error.message === 'User already registered'
+        ? 'Este email já está cadastrado.'
+        : 'Erro ao criar conta. Tente novamente.')
       return
     }
 
-    // Redireciona admin para painel, customer para home
+    // Se confirmação de email estiver desativada no Supabase, redireciona direto
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      const { data: perfil } = await supabase
-        .from('loja_perfis')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-      if (perfil?.role === 'admin') {
-        router.push('/admin')
-      } else {
-        router.push('/')
-      }
+      router.push('/')
       router.refresh()
+    } else {
+      setSucesso(true)
     }
+  }
+
+  if (sucesso) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="text-center max-w-sm">
+          <div className="text-5xl mb-4">📬</div>
+          <h2 className="text-xl font-bold text-gray-900">Verifique seu email</h2>
+          <p className="text-sm text-gray-500 mt-2">
+            Enviamos um link de confirmação para <strong>{email}</strong>.
+            Clique no link para ativar sua conta.
+          </p>
+          <Link href="/login" className="mt-6 inline-block text-sm text-indigo-600 font-medium hover:underline">
+            Voltar para o login
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Entrar</h1>
-          <p className="text-sm text-gray-400 mt-1">Acesse sua conta Micro Guias</p>
+          <h1 className="text-2xl font-bold text-gray-900">Criar conta</h1>
+          <p className="text-sm text-gray-400 mt-1">Acesse ebooks incríveis por menos</p>
         </div>
 
         <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 space-y-4">
@@ -82,8 +101,18 @@ export default function LoginPage() {
             <div className="flex-1 border-t border-gray-100" />
           </div>
 
-          {/* Email/senha */}
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleCadastro} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+              <input
+                type="text"
+                required
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="Seu nome"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input
@@ -100,10 +129,11 @@ export default function LoginPage() {
               <input
                 type="password"
                 required
+                minLength={6}
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="••••••••"
+                placeholder="Mínimo 6 caracteres"
               />
             </div>
 
@@ -118,15 +148,15 @@ export default function LoginPage() {
               disabled={carregando}
               className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-60 cursor-pointer"
             >
-              {carregando ? 'Entrando…' : 'Entrar'}
+              {carregando ? 'Criando conta…' : 'Criar conta grátis'}
             </button>
           </form>
         </div>
 
         <p className="text-center text-sm text-gray-400 mt-4">
-          Não tem conta?{' '}
-          <Link href="/cadastro" className="text-indigo-600 font-medium hover:underline">
-            Cadastre-se grátis
+          Já tem conta?{' '}
+          <Link href="/login" className="text-indigo-600 font-medium hover:underline">
+            Entrar
           </Link>
         </p>
         <p className="text-center text-sm text-gray-400 mt-2">
