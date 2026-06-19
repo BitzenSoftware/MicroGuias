@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -13,6 +13,13 @@ export default function LoginPage() {
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState<string | null>(null)
   const [carregando, setCarregando] = useState(false)
+
+  // Mostra erro vindo do callback OAuth (?erro=...)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const erroUrl = params.get('erro')
+    if (erroUrl) setErro(decodeURIComponent(erroUrl))
+  }, [])
 
   async function handleGoogle() {
     await supabase.auth.signInWithOAuth({

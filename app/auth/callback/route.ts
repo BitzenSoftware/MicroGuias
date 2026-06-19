@@ -4,9 +4,17 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const oauthError = searchParams.get('error')
+  const oauthErrorDesc = searchParams.get('error_description')
+
+  // Surfacing do erro real vindo do Supabase/Google
+  if (oauthError || oauthErrorDesc) {
+    const msg = oauthErrorDesc || oauthError || 'erro_desconhecido'
+    return NextResponse.redirect(`${origin}/login?erro=${encodeURIComponent(msg)}`)
+  }
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?erro=oauth`)
+    return NextResponse.redirect(`${origin}/login?erro=${encodeURIComponent('sem_code_na_volta')}`)
   }
 
   // Coleta os cookies que o Supabase quer gravar durante a troca do código.
@@ -30,7 +38,7 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
-    return NextResponse.redirect(`${origin}/login?erro=oauth`)
+    return NextResponse.redirect(`${origin}/login?erro=${encodeURIComponent('exchange: ' + error.message)}`)
   }
 
   // Decide o destino conforme a role do utilizador.
