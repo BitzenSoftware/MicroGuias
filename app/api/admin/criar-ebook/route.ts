@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Conteúdo inválido' }, { status: 400 })
   }
 
-  const supabase = await createServiceClient()
+  const supabase = createServiceClient()
   const slug = `${slugify(titulo)}-${Date.now().toString(36)}`
 
   try {
@@ -72,6 +72,7 @@ export async function POST(request: Request) {
         capa_url: capaUrl,
         pdf_url: pdfPath, // caminho no bucket privado
         gemini_prompt: geminiPrompt,
+        conteudo, // guarda o JSON gerado para regenerar o PDF depois
         publicado: true,
       })
       .select('id, slug')

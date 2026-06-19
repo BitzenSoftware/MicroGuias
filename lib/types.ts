@@ -18,6 +18,7 @@ export type Ebook = {
   publicado: boolean
   criado_em: string
   categoria_id: string | null
+  conteudo?: EbookConteudo | null
   loja_categorias: Categoria | null
 }
 

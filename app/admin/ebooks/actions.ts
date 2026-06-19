@@ -8,7 +8,7 @@ export async function togglePublicado(id: string, publicado: boolean) {
   const admin = await getAdmin()
   if (!admin) throw new Error('Não autorizado')
 
-  const supabase = await createServiceClient()
+  const supabase = createServiceClient()
   const { error } = await supabase
     .from('loja_ebooks')
     .update({ publicado })

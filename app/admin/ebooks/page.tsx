@@ -39,18 +39,23 @@ export default async function AdminEbooksPage() {
                   )}
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{ebook.titulo}</p>
+                <Link href={`/admin/ebooks/${ebook.id}`} className="flex-1 min-w-0 group">
+                  <p className="font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">{ebook.titulo}</p>
                   <p className="text-sm text-gray-400">
                     {ebook.loja_categorias?.nome ?? 'Sem categoria'} · {formatPreco(ebook.preco_centavos)}
                   </p>
-                </div>
+                </Link>
 
                 <TogglePublicado id={ebook.id} publicado={ebook.publicado} />
 
                 {ebook.pdf_url && (
                   <span className="text-xs text-gray-300" title="PDF gerado">📄</span>
                 )}
+
+                <Link href={`/admin/ebooks/${ebook.id}`}
+                  className="text-sm font-medium text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors">
+                  Editar
+                </Link>
               </div>
             )
           })}
