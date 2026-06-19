@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import { formatPreco } from '@/lib/utils'
 
 export default async function AdminDashboard() {
-  const supabase = await createClient()
+  // service-role: contagens incluem rascunhos e dados de pedidos
+  const supabase = createServiceClient()
 
   const [{ count: totalEbooks }, { count: publicados }, { data: pedidosPagos }] =
     await Promise.all([

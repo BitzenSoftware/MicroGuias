@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import { formatPreco } from '@/lib/utils'
 import type { Ebook } from '@/lib/types'
 import { TogglePublicado } from '@/components/admin/TogglePublicado'
 
 export default async function AdminEbooksPage() {
-  const supabase = await createClient()
+  // service-role: admin enxerga publicados E rascunhos (ignora RLS de publicado)
+  const supabase = createServiceClient()
   const { data: ebooks } = await supabase
     .from('loja_ebooks')
     .select('*, loja_categorias(id, nome, slug, icone_emoji, ordem)')
