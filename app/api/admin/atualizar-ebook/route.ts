@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAdmin } from '@/lib/admin'
 import { createServiceClient } from '@/lib/supabase/server'
-import { renderEbookPdf } from '@/lib/pdf'
-import type { EbookConteudo } from '@/lib/types'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -19,8 +17,9 @@ export async function POST(request: Request) {
   const categoriaId = String(form.get('categoria_id') ?? '')
   const precoCentavos = Number(form.get('preco_centavos'))
   const descricaoCurta = String(form.get('descricao_curta') ?? '')
-  const regenerarPdf = String(form.get('regenerar_pdf') ?? '') === 'true'
+  const descricaoLonga = String(form.get('descricao_longa') ?? '')
   const capa = form.get('capa') as File | null
+  const pdf = form.get('pdf') as File | null
 
   if (!id || !titulo || !categoriaId || !precoCentavos) {
     return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
@@ -28,10 +27,9 @@ export async function POST(request: Request) {
 
   const supabase = createServiceClient()
 
-  // Carrega o ebook atual (slug, conteudo, pdf_url)
   const { data: atual, error: getErr } = await supabase
     .from('loja_ebooks')
-    .select('slug, pdf_url, conteudo')
+    .select('slug, pdf_url')
     .eq('id', id)
     .single()
 
@@ -45,6 +43,7 @@ export async function POST(request: Request) {
       categoria_id: categoriaId,
       preco_centavos: precoCentavos,
       descricao_curta: descricaoCurta || null,
+      descricao_longa: descricaoLonga || null,
     }
 
     // Troca de capa (opcional)
@@ -59,16 +58,15 @@ export async function POST(request: Request) {
       update.capa_url = supabase.storage.from('capas').getPublicUrl(caminho).data.publicUrl
     }
 
-    // Regenera o PDF com o título atualizado (se houver conteúdo salvo)
-    if (regenerarPdf && atual.conteudo) {
-      const conteudo = { ...(atual.conteudo as EbookConteudo), titulo }
-      const pdfBuffer = await renderEbookPdf(conteudo)
+    // Troca do PDF (opcional)
+    if (pdf && pdf.size > 0) {
       const pdfPath = atual.pdf_url || `${atual.slug}.pdf`
+      const buffer = Buffer.from(await pdf.arrayBuffer())
       const { error: pdfErr } = await supabase.storage
         .from('pdfs')
-        .upload(pdfPath, pdfBuffer, { contentType: 'application/pdf', upsert: true })
+        .upload(pdfPath, buffer, { contentType: 'application/pdf', upsert: true })
       if (pdfErr) throw new Error('PDF: ' + pdfErr.message)
-      update.conteudo = conteudo
+      update.pdf_url = pdfPath
     }
 
     const { error: updErr } = await supabase

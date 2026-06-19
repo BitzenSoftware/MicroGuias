@@ -18,13 +18,12 @@ export function EbookEditForm({
   const [categoriaId, setCategoriaId] = useState(ebook.categoria_id ?? '')
   const [preco, setPreco] = useState((ebook.preco_centavos / 100).toFixed(2).replace('.', ','))
   const [descricaoCurta, setDescricaoCurta] = useState(ebook.descricao_curta ?? '')
+  const [descricaoLonga, setDescricaoLonga] = useState(ebook.descricao_longa ?? '')
   const [capa, setCapa] = useState<File | null>(null)
-  const [regenerarPdf, setRegenerarPdf] = useState(false)
+  const [pdf, setPdf] = useState<File | null>(null)
 
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
-
-  const temConteudo = !!ebook.conteudo
 
   async function salvar() {
     setErro(null)
@@ -40,8 +39,9 @@ export function EbookEditForm({
       form.append('categoria_id', categoriaId)
       form.append('preco_centavos', String(precoCentavos))
       form.append('descricao_curta', descricaoCurta)
-      form.append('regenerar_pdf', String(regenerarPdf))
+      form.append('descricao_longa', descricaoLonga)
       if (capa) form.append('capa', capa)
+      if (pdf) form.append('pdf', pdf)
 
       const res = await fetch('/api/admin/atualizar-ebook', { method: 'POST', body: form })
       const data = await res.json()
@@ -73,7 +73,7 @@ export function EbookEditForm({
           </div>
           <div className="flex-1">
             <label className={labelCls}>{ebook.capa_url ? 'Trocar capa' : 'Adicionar capa'}</label>
-            <input type="file" accept="image/*" onChange={(e) => setCapa(e.target.files?.[0] ?? null)}
+            <input type="file" title="Capa do ebook" accept="image/*" onChange={(e) => setCapa(e.target.files?.[0] ?? null)}
               className="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 file:text-sm file:font-medium hover:file:bg-indigo-100" />
             {capa && <p className="text-xs text-green-600 mt-2">Nova capa: {capa.name}</p>}
           </div>
@@ -87,7 +87,7 @@ export function EbookEditForm({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Categoria *</label>
-            <select className={inputCls} value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}>
+            <select title="Categoria" className={inputCls} value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}>
               <option value="">Selecione…</option>
               {categorias.map((c) => (
                 <option key={c.id} value={c.id}>{c.icone_emoji} {c.nome}</option>
@@ -105,12 +105,19 @@ export function EbookEditForm({
           <input className={inputCls} value={descricaoCurta} onChange={(e) => setDescricaoCurta(e.target.value)} />
         </div>
 
-        {temConteudo && (
-          <label className="flex items-center gap-2 text-sm text-gray-600 pt-2">
-            <input type="checkbox" checked={regenerarPdf} onChange={(e) => setRegenerarPdf(e.target.checked)} />
-            Regenerar o PDF com o novo título
-          </label>
-        )}
+        <div>
+          <label className={labelCls}>Descrição completa</label>
+          <textarea className={`${inputCls} min-h-24`} value={descricaoLonga} onChange={(e) => setDescricaoLonga(e.target.value)} placeholder="Texto que aparece na página do produto" />
+        </div>
+
+        <div className="pt-2 border-t border-gray-50">
+          <label className={labelCls}>Substituir arquivo do ebook (PDF)</label>
+          <input type="file" title="Arquivo PDF do ebook" accept="application/pdf" onChange={(e) => setPdf(e.target.files?.[0] ?? null)}
+            className="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 file:text-sm file:font-medium hover:file:bg-indigo-100" />
+          {pdf
+            ? <p className="text-xs text-green-600 mt-1">Novo PDF: {pdf.name}</p>
+            : <p className="text-xs text-gray-400 mt-1">Deixe vazio para manter o PDF atual.</p>}
+        </div>
       </div>
 
       {erro && (

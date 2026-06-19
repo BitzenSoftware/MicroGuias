@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getAdmin } from '@/lib/admin'
 import { createServiceClient } from '@/lib/supabase/server'
-import { renderEbookPdf } from '@/lib/pdf'
 import { slugify } from '@/lib/utils'
-import type { EbookConteudo } from '@/lib/types'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -19,26 +17,22 @@ export async function POST(request: Request) {
   const categoriaId = String(form.get('categoria_id') ?? '')
   const precoCentavos = Number(form.get('preco_centavos'))
   const descricaoCurta = String(form.get('descricao_curta') ?? '')
-  const geminiPrompt = String(form.get('gemini_prompt') ?? '')
-  const conteudoRaw = String(form.get('conteudo') ?? '')
+  const descricaoLonga = String(form.get('descricao_longa') ?? '')
   const capa = form.get('capa') as File | null
+  const pdf = form.get('pdf') as File | null
 
-  if (!titulo || !categoriaId || !precoCentavos || !conteudoRaw) {
-    return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
+  if (!titulo || !categoriaId || !precoCentavos) {
+    return NextResponse.json({ error: 'Preencha título, categoria e preço.' }, { status: 400 })
   }
-
-  let conteudo: EbookConteudo
-  try {
-    conteudo = JSON.parse(conteudoRaw)
-  } catch {
-    return NextResponse.json({ error: 'Conteúdo inválido' }, { status: 400 })
+  if (!pdf || pdf.size === 0) {
+    return NextResponse.json({ error: 'Anexe o arquivo PDF do ebook.' }, { status: 400 })
   }
 
   const supabase = createServiceClient()
   const slug = `${slugify(titulo)}-${Date.now().toString(36)}`
 
   try {
-    // 1) Upload da capa (opcional)
+    // 1) Capa (opcional, mas recomendada)
     let capaUrl: string | null = null
     if (capa && capa.size > 0) {
       const ext = capa.name.split('.').pop() || 'jpg'
@@ -51,9 +45,9 @@ export async function POST(request: Request) {
       capaUrl = supabase.storage.from('capas').getPublicUrl(caminho).data.publicUrl
     }
 
-    // 2) Gera o PDF
-    const pdfBuffer = await renderEbookPdf(conteudo)
+    // 2) PDF do ebook (bucket privado)
     const pdfPath = `${slug}.pdf`
+    const pdfBuffer = Buffer.from(await pdf.arrayBuffer())
     const { error: pdfErr } = await supabase.storage
       .from('pdfs')
       .upload(pdfPath, pdfBuffer, { contentType: 'application/pdf', upsert: true })
@@ -66,13 +60,11 @@ export async function POST(request: Request) {
         titulo,
         slug,
         descricao_curta: descricaoCurta || null,
-        descricao_longa: conteudo.introducao,
+        descricao_longa: descricaoLonga || null,
         categoria_id: categoriaId,
         preco_centavos: precoCentavos,
         capa_url: capaUrl,
-        pdf_url: pdfPath, // caminho no bucket privado
-        gemini_prompt: geminiPrompt,
-        conteudo, // guarda o JSON gerado para regenerar o PDF depois
+        pdf_url: pdfPath,
         publicado: true,
       })
       .select('id, slug')
