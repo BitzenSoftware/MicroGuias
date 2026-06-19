@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { formatPreco } from '@/lib/utils'
 import type { Ebook } from '@/lib/types'
 import { TogglePublicado } from '@/components/admin/TogglePublicado'
+import { DeleteEbookButton } from '@/components/admin/DeleteEbookButton'
 
 export default async function AdminEbooksPage() {
   // service-role: admin enxerga publicados E rascunhos (ignora RLS de publicado)
@@ -56,6 +57,8 @@ export default async function AdminEbooksPage() {
                   className="text-sm font-medium text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors">
                   Editar
                 </Link>
+
+                <DeleteEbookButton id={ebook.id} titulo={ebook.titulo} />
               </div>
             )
           })}
