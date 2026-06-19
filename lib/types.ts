@@ -4,6 +4,7 @@ export type Categoria = {
   slug: string
   icone_emoji: string
   ordem: number
+  ativa?: boolean
 }
 
 export type Ebook = {

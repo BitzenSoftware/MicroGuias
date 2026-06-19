@@ -7,6 +7,7 @@ const links = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
   { href: '/admin/ebooks', label: 'Ebooks', icon: '📚' },
   { href: '/admin/ebooks/novo', label: 'Novo ebook', icon: '✨' },
+  { href: '/admin/categorias', label: 'Categorias', icon: '🏷️' },
   { href: '/admin/pedidos', label: 'Pedidos', icon: '🧾' },
 ]
 
