@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Categoria } from '@/lib/types'
+import { createClient } from '@/lib/supabase/client'
 
 export function EbookForm({ categorias }: { categorias: Categoria[] }) {
   const router = useRouter()
@@ -28,16 +29,48 @@ export function EbookForm({ categorias }: { categorias: Categoria[] }) {
 
     setPublicando(true)
     try {
-      const form = new FormData()
-      form.append('titulo', titulo)
-      form.append('categoria_id', categoriaId)
-      form.append('preco_centavos', String(precoCentavos))
-      form.append('descricao_curta', descricaoCurta)
-      form.append('descricao_longa', descricaoLonga)
-      if (capa) form.append('capa', capa)
-      form.append('pdf', pdf)
+      // 1) Pede URLs de upload assinadas
+      const capaExt = capa ? capa.name.split('.').pop() || 'jpg' : undefined
+      const r = await fetch('/api/admin/upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ titulo, capaExt, temCapa: !!capa, temPdf: true }),
+      })
+      const u = await r.json()
+      if (!r.ok) throw new Error(u.error || 'Falha ao preparar upload')
 
-      const res = await fetch('/api/admin/criar-ebook', { method: 'POST', body: form })
+      // 2) Envia os arquivos direto ao Storage (sem limite de 4,5 MB)
+      const supabase = createClient()
+
+      const upPdf = await supabase.storage
+        .from('pdfs')
+        .uploadToSignedUrl(u.pdf.path, u.pdf.token, pdf)
+      if (upPdf.error) throw new Error('Falha ao enviar o PDF: ' + upPdf.error.message)
+
+      let capaUrl: string | null = null
+      if (capa && u.capa) {
+        const upCapa = await supabase.storage
+          .from('capas')
+          .uploadToSignedUrl(u.capa.path, u.capa.token, capa)
+        if (upCapa.error) throw new Error('Falha ao enviar a capa: ' + upCapa.error.message)
+        capaUrl = u.capaUrl
+      }
+
+      // 3) Cria o registro do ebook
+      const res = await fetch('/api/admin/criar-ebook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titulo,
+          slug: u.slug,
+          categoria_id: categoriaId,
+          preco_centavos: precoCentavos,
+          descricao_curta: descricaoCurta,
+          descricao_longa: descricaoLonga,
+          capa_url: capaUrl,
+          pdf_path: u.pdf.path,
+        }),
+      })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Falha ao publicar')
 

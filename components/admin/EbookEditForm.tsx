@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import type { Categoria, Ebook } from '@/lib/types'
+import { createClient } from '@/lib/supabase/client'
 
 export function EbookEditForm({
   ebook,
@@ -33,17 +34,48 @@ export function EbookEditForm({
 
     setSalvando(true)
     try {
-      const form = new FormData()
-      form.append('id', ebook.id)
-      form.append('titulo', titulo)
-      form.append('categoria_id', categoriaId)
-      form.append('preco_centavos', String(precoCentavos))
-      form.append('descricao_curta', descricaoCurta)
-      form.append('descricao_longa', descricaoLonga)
-      if (capa) form.append('capa', capa)
-      if (pdf) form.append('pdf', pdf)
+      let capaUrl: string | null = null
+      let pdfPath: string | null = null
 
-      const res = await fetch('/api/admin/atualizar-ebook', { method: 'POST', body: form })
+      // Se houver arquivos novos, envia direto ao Storage (reusa o slug)
+      if (capa || pdf) {
+        const capaExt = capa ? capa.name.split('.').pop() || 'jpg' : undefined
+        const r = await fetch('/api/admin/upload-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: ebook.slug, capaExt, temCapa: !!capa, temPdf: !!pdf }),
+        })
+        const u = await r.json()
+        if (!r.ok) throw new Error(u.error || 'Falha ao preparar upload')
+
+        const supabase = createClient()
+
+        if (pdf && u.pdf) {
+          const up = await supabase.storage.from('pdfs').uploadToSignedUrl(u.pdf.path, u.pdf.token, pdf)
+          if (up.error) throw new Error('Falha ao enviar o PDF: ' + up.error.message)
+          pdfPath = u.pdf.path
+        }
+        if (capa && u.capa) {
+          const up = await supabase.storage.from('capas').uploadToSignedUrl(u.capa.path, u.capa.token, capa)
+          if (up.error) throw new Error('Falha ao enviar a capa: ' + up.error.message)
+          capaUrl = u.capaUrl
+        }
+      }
+
+      const res = await fetch('/api/admin/atualizar-ebook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: ebook.id,
+          titulo,
+          categoria_id: categoriaId,
+          preco_centavos: precoCentavos,
+          descricao_curta: descricaoCurta,
+          descricao_longa: descricaoLonga,
+          capa_url: capaUrl,
+          pdf_path: pdfPath,
+        }),
+      })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Falha ao salvar')
 
