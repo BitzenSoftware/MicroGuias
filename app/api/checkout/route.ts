@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { criarPix } from '@/lib/abacatepay'
+import { criarPreferencia } from '@/lib/mercadopago'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
   const desconto = temDesconto ? Math.round(subtotal * PERCENTUAL_DESCONTO) : 0
   const total = subtotal - desconto
 
-  // 4) Dados do comprador (do perfil)
+  // 4) Dados do comprador
   const { data: perfil } = await supabase
     .from('loja_perfis')
     .select('nome, email')
@@ -84,23 +84,23 @@ export async function POST(request: Request) {
     const { error: itErr } = await supabase.from('loja_pedido_itens').insert(itens)
     if (itErr) throw new Error('Falha ao registrar itens')
 
-    // 7) Cria a cobrança PIX no AbacatePay
-    const descricao =
-      ebooks.length === 1 ? ebooks[0].titulo : `${ebooks.length} ebooks Micro Guias`
-    const pix = await criarPix(total, descricao, { nome, email })
+    // 7) Cria a preferência de pagamento no Mercado Pago
+    const origin = new URL(request.url).origin
+    const pref = await criarPreferencia({
+      pedidoId: pedido.id,
+      itens: ebooks.map((e) => ({ titulo: e.titulo, precoCentavos: e.preco_centavos })),
+      totalCentavos: total,
+      pagador: { nome, email },
+      origin,
+    })
 
-    // 8) Guarda dados do PIX no pedido
+    // 8) Guarda a referência da preferência
     await supabase
       .from('loja_pedidos')
-      .update({
-        abacatepay_id: pix.id,
-        pix_qr_code: pix.brCodeBase64,
-        pix_copia_cola: pix.brCode,
-        pix_expira_em: pix.expiresAt,
-      })
+      .update({ abacatepay_id: pref.id })
       .eq('id', pedido.id)
 
-    return NextResponse.json({ pedidoId: pedido.id })
+    return NextResponse.json({ initPoint: pref.initPoint, pedidoId: pedido.id })
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Erro no checkout'
     return NextResponse.json({ error: msg }, { status: 500 })

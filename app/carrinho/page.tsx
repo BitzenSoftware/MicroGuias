@@ -31,7 +31,8 @@ export default function CarrinhoPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Falha ao iniciar o pagamento')
 
-      router.push(`/pix/${data.pedidoId}`)
+      // Redireciona para o checkout hospedado do Mercado Pago
+      window.location.href = data.initPoint
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao finalizar')
     } finally {
@@ -119,9 +120,9 @@ export default function CarrinhoPage() {
           disabled={processando}
           className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors disabled:opacity-60 cursor-pointer"
         >
-          {processando ? 'Gerando PIX…' : 'Finalizar compra com PIX'}
+          {processando ? 'Redirecionando…' : 'Finalizar compra'}
         </button>
-        <p className="text-center text-xs text-gray-400">🔒 Pagamento seguro via PIX · entrega imediata</p>
+        <p className="text-center text-xs text-gray-400">🔒 Pagamento via Mercado Pago · PIX ou cartão · entrega imediata</p>
       </div>
     </div>
   )

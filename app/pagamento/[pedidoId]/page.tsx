@@ -1,8 +1,8 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { PixDisplay } from '@/components/checkout/PixDisplay'
+import { StatusPoller } from '@/components/checkout/StatusPoller'
 
-export default async function PixPage({
+export default async function PagamentoPage({
   params,
 }: {
   params: Promise<{ pedidoId: string }>
@@ -16,19 +16,11 @@ export default async function PixPage({
   const supabase = createServiceClient()
   const { data: pedido } = await supabase
     .from('loja_pedidos')
-    .select('id, user_id, status, total_centavos, pix_qr_code, pix_copia_cola')
+    .select('id, user_id, status')
     .eq('id', pedidoId)
     .single()
 
   if (!pedido || pedido.user_id !== user.id) return notFound()
 
-  return (
-    <PixDisplay
-      pedidoId={pedido.id}
-      statusInicial={pedido.status}
-      totalCentavos={pedido.total_centavos}
-      qrCodeBase64={pedido.pix_qr_code}
-      copiaCola={pedido.pix_copia_cola}
-    />
-  )
+  return <StatusPoller pedidoId={pedido.id} statusInicial={pedido.status} />
 }

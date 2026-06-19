@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { checarPix } from '@/lib/abacatepay'
+import { pedidoEstaPago } from '@/lib/mercadopago'
 import { confirmarPagamento } from '@/lib/pedidos'
 
 export const runtime = 'nodejs'
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   const supabase = createServiceClient()
   const { data: pedido } = await supabase
     .from('loja_pedidos')
-    .select('id, user_id, status, abacatepay_id')
+    .select('id, user_id, status')
     .eq('id', id)
     .single()
 
@@ -31,17 +31,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ status: 'pago' })
   }
 
-  // Consulta o AbacatePay
-  if (pedido.abacatepay_id) {
-    try {
-      const { status } = await checarPix(pedido.abacatepay_id)
-      if (status === 'PAID') {
-        await confirmarPagamento(supabase, pedido.id)
-        return NextResponse.json({ status: 'pago' })
-      }
-    } catch {
-      // mantém aguardando em caso de erro transitório
+  // Consulta o Mercado Pago por external_reference (id do pedido)
+  try {
+    if (await pedidoEstaPago(pedido.id)) {
+      await confirmarPagamento(supabase, pedido.id)
+      return NextResponse.json({ status: 'pago' })
     }
+  } catch {
+    // mantém aguardando em erro transitório
   }
 
   return NextResponse.json({ status: pedido.status })
