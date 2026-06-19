@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
 import './globals.css'
 import { Header } from '@/components/layout/Header'
+import { CartProvider } from '@/lib/cart'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 
@@ -17,13 +18,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" className={geist.variable}>
       <body className="bg-gray-50 min-h-screen antialiased font-[family-name:var(--font-geist)]">
-        <Header />
-        <main className="w-full px-4 sm:px-6 lg:px-12 py-8">
-          {children}
-        </main>
-        <footer className="border-t border-gray-200 mt-16 py-8 text-center text-sm text-gray-400">
-          © {new Date().getFullYear()} Micro Guias · Todos os direitos reservados
-        </footer>
+        <CartProvider>
+          <Header />
+          <main className="w-full px-4 sm:px-6 lg:px-12 py-8">
+            {children}
+          </main>
+          <footer className="border-t border-gray-200 mt-16 py-8 text-center text-sm text-gray-400">
+            © {new Date().getFullYear()} Micro Guias · Todos os direitos reservados
+          </footer>
+        </CartProvider>
       </body>
     </html>
   )

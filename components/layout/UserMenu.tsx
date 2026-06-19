@@ -64,6 +64,13 @@ export function UserMenu({ nome, email, avatarUrl, isAdmin }: Props) {
               <p className="text-sm font-medium text-gray-900 truncate">{nome}</p>
               <p className="text-xs text-gray-400 truncate">{email}</p>
             </div>
+            <Link
+              href="/minha-conta"
+              onClick={() => setAberto(false)}
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              📚 Meus ebooks
+            </Link>
             {isAdmin && (
               <Link
                 href="/admin"

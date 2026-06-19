@@ -4,6 +4,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { formatPreco } from '@/lib/utils'
+import { AddToCartButton } from '@/components/store/AddToCartButton'
 
 export async function generateMetadata({
   params,
@@ -49,6 +50,14 @@ export default async function EbookPage({
   const categoria = ebook.loja_categorias as {
     id: string; nome: string; slug: string; icone_emoji: string
   } | null
+
+  const itemCarrinho = {
+    id: ebook.id,
+    titulo: ebook.titulo,
+    slug: ebook.slug,
+    preco_centavos: ebook.preco_centavos,
+    capa_url: ebook.capa_url,
+  }
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -106,12 +115,8 @@ export default async function EbookPage({
             </p>
 
             <div className="flex flex-col gap-3">
-              <button className="w-full bg-indigo-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-indigo-700 transition-colors cursor-pointer">
-                Adicionar ao Carrinho
-              </button>
-              <button className="w-full bg-white border-2 border-indigo-600 text-indigo-600 py-3 px-6 rounded-xl font-semibold hover:bg-indigo-50 transition-colors cursor-pointer">
-                Comprar Agora
-              </button>
+              <AddToCartButton item={itemCarrinho} />
+              <AddToCartButton item={itemCarrinho} comprarAgora />
             </div>
           </div>
 
