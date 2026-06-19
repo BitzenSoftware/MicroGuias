@@ -20,3 +20,17 @@ export type Ebook = {
   categoria_id: string | null
   loja_categorias: Categoria | null
 }
+
+// Conteúdo estruturado gerado pelo Gemini
+export type Capitulo = {
+  titulo: string
+  conteudo: string
+}
+
+export type EbookConteudo = {
+  titulo: string
+  subtitulo: string
+  introducao: string
+  capitulos: Capitulo[]
+  conclusao: string
+}

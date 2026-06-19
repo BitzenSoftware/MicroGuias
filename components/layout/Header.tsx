@@ -10,6 +10,16 @@ export async function Header() {
   const nome = user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? user?.email?.split('@')[0] ?? 'Utilizador'
   const email = user?.email ?? ''
 
+  let isAdmin = false
+  if (user) {
+    const { data: perfil } = await supabase
+      .from('loja_perfis')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    isAdmin = perfil?.role === 'admin'
+  }
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="w-full px-4 sm:px-6 lg:px-12">
@@ -20,7 +30,7 @@ export async function Header() {
 
           <div className="flex items-center gap-4">
             {user ? (
-              <UserMenu nome={nome} email={email} avatarUrl={avatarUrl} />
+              <UserMenu nome={nome} email={email} avatarUrl={avatarUrl} isAdmin={isAdmin} />
             ) : (
               <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">
                 Entrar
