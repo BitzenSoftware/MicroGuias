@@ -43,7 +43,8 @@ export async function POST(request: Request) {
 
     if (body.temCapa) {
       const ext = (body.capaExt || 'jpg').toLowerCase()
-      const path = `${slug}.${ext}`
+      // Nome único por upload → evita cache da capa antiga (CDN/navegador)
+      const path = `${slug}-${Date.now().toString(36)}.${ext}`
       const { data, error } = await supabase.storage
         .from('capas')
         .createSignedUploadUrl(path, { upsert: true })

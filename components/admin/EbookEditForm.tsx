@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import type { Categoria, Ebook } from '@/lib/types'
@@ -22,9 +22,18 @@ export function EbookEditForm({
   const [descricaoLonga, setDescricaoLonga] = useState(ebook.descricao_longa ?? '')
   const [capa, setCapa] = useState<File | null>(null)
   const [pdf, setPdf] = useState<File | null>(null)
+  const [previewCapa, setPreviewCapa] = useState<string | null>(null)
 
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+
+  // Preview instantâneo da capa recém-escolhida
+  useEffect(() => {
+    if (!capa) { setPreviewCapa(null); return }
+    const url = URL.createObjectURL(capa)
+    setPreviewCapa(url)
+    return () => URL.revokeObjectURL(url)
+  }, [capa])
 
   async function salvar() {
     setErro(null)
@@ -97,7 +106,10 @@ export function EbookEditForm({
         <div className="flex gap-5">
           {/* Capa atual */}
           <div className="relative h-32 w-24 flex-shrink-0 rounded-lg overflow-hidden bg-indigo-50">
-            {ebook.capa_url ? (
+            {previewCapa ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={previewCapa} alt="Nova capa" className="absolute inset-0 w-full h-full object-cover" />
+            ) : ebook.capa_url ? (
               <Image src={ebook.capa_url} alt={ebook.titulo} fill className="object-cover" sizes="96px" />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-3xl">📖</div>
