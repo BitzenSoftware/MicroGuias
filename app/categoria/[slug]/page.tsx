@@ -50,6 +50,14 @@ export default async function CategoriaPage({
     .eq('categoria_id', categoria.id)
     .order('criado_em', { ascending: false })
 
+  // Só mostra no filtro categorias que têm ebook publicado
+  const { data: publicados } = await supabase
+    .from('loja_ebooks')
+    .select('categoria_id')
+    .eq('publicado', true)
+  const idsComEbook = new Set((publicados ?? []).map((e) => e.categoria_id))
+  const categoriasVisiveis = (categorias ?? []).filter((c) => idsComEbook.has(c.id))
+
   return (
     <div className="space-y-8">
       <div>
@@ -61,7 +69,7 @@ export default async function CategoriaPage({
         </p>
       </div>
 
-      <CategoryFilter categorias={categorias ?? []} categoriaAtiva={slug} />
+      <CategoryFilter categorias={categoriasVisiveis} categoriaAtiva={slug} />
 
       {ebooks && ebooks.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 sm:gap-6">

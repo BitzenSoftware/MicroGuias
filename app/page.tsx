@@ -18,6 +18,10 @@ export default async function HomePage() {
       .order('criado_em', { ascending: false }),
   ])
 
+  // Só mostra categorias que têm pelo menos um ebook publicado
+  const idsComEbook = new Set((ebooks ?? []).map((e) => e.categoria_id))
+  const categoriasVisiveis = (categorias ?? []).filter((c) => idsComEbook.has(c.id))
+
   return (
     <div className="space-y-10">
       {/* Hero */}
@@ -34,7 +38,7 @@ export default async function HomePage() {
       </div>
 
       {/* Filtro de categorias */}
-      <CategoryFilter categorias={categorias ?? []} />
+      <CategoryFilter categorias={categoriasVisiveis} />
 
       {/* Grade de ebooks */}
       {ebooks && ebooks.length > 0 ? (
