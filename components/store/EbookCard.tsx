@@ -24,16 +24,16 @@ export function EbookCard({ ebook }: { ebook: Ebook }) {
               <span className="text-5xl">📖</span>
             </div>
           )}
-
-          {categoria && (
-            <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-600 px-2.5 py-1 rounded-full shadow-sm">
-              {categoria.icone_emoji} {categoria.nome}
-            </span>
-          )}
         </div>
 
         {/* Informações */}
         <div className="p-4">
+          {categoria && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-600 mb-1.5">
+              {categoria.icone_emoji} {categoria.nome}
+            </span>
+          )}
+
           <h3 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
             {ebook.titulo}
           </h3>
