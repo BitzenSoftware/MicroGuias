@@ -5,25 +5,27 @@ const LARGURA = 1000
 const ALTURA = 1333
 
 /**
- * Normaliza a imagem de capa:
- * 1. Achata sobre fundo branco (remove transparência)
- * 2. Recorta as bordas de fundo uniforme (deixa só o livro + sombra)
- * 3. Reenquadra num canvas 3:4 branco, com o livro preenchendo o espaço
- * Se algo falhar, devolve o buffer original.
+ * Normaliza a capa: fundo branco + recorte do miolo (best-effort) + canvas 3:4.
+ * O recorte (trim) é tentado isoladamente — se falhar, segue sem recortar.
+ * O resize/jpeg final SEMPRE roda; se o sharp não conseguir ler a imagem,
+ * o erro propaga para quem chamou decidir o fallback.
  */
 export async function normalizarCapa(entrada: Buffer): Promise<Buffer> {
+  // 1) Recorte do excesso de fundo — opcional
+  let base: Buffer = entrada
   try {
-    return await sharp(entrada)
+    base = await sharp(entrada)
       .flatten({ background: '#ffffff' })
       .trim({ threshold: 25 })
-      .resize(LARGURA, ALTURA, {
-        fit: 'contain',
-        background: '#ffffff',
-        withoutEnlargement: false,
-      })
-      .jpeg({ quality: 88 })
       .toBuffer()
   } catch {
-    return entrada
+    base = entrada
   }
+
+  // 2) Reenquadra em 3:4 sobre branco e exporta JPEG válido
+  return sharp(base)
+    .flatten({ background: '#ffffff' })
+    .resize(LARGURA, ALTURA, { fit: 'contain', background: '#ffffff' })
+    .jpeg({ quality: 88 })
+    .toBuffer()
 }

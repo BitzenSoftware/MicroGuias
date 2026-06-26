@@ -7,11 +7,13 @@ import { slugify } from '@/lib/utils'
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-/**
- * Recebe a imagem de capa (ou um ebookId para reprocessar a existente),
- * normaliza (fundo branco + enquadrar o livro em 3:4) e sobe ao Storage.
- * Capas são pequenas (< 4,5 MB), então passam pela função sem problema.
- */
+function extDoMime(mime: string): string {
+  if (mime.includes('png')) return 'png'
+  if (mime.includes('webp')) return 'webp'
+  if (mime.includes('gif')) return 'gif'
+  return 'jpg'
+}
+
 export async function POST(request: Request) {
   const admin = await getAdmin()
   if (!admin) {
@@ -25,12 +27,14 @@ export async function POST(request: Request) {
 
   const supabase = createServiceClient()
 
-  // Origem da imagem: arquivo novo OU capa existente do ebook
+  // Origem: arquivo novo OU capa existente do ebook
   let entrada: Buffer
+  let mimeOriginal = 'image/png'
   let slug = slugBase
 
   if (capa && capa.size > 0) {
     entrada = Buffer.from(await capa.arrayBuffer())
+    mimeOriginal = capa.type || 'image/png'
   } else if (ebookId) {
     const { data: ebook } = await supabase
       .from('loja_ebooks')
@@ -44,29 +48,42 @@ export async function POST(request: Request) {
     const resp = await fetch(ebook.capa_url)
     if (!resp.ok) return NextResponse.json({ error: 'Falha ao baixar a capa atual' }, { status: 400 })
     entrada = Buffer.from(await resp.arrayBuffer())
+    mimeOriginal = resp.headers.get('content-type') || 'image/jpeg'
   } else {
     return NextResponse.json({ error: 'Nenhuma imagem enviada' }, { status: 400 })
   }
 
+  // Tenta normalizar; se o sharp falhar, usa a imagem original (válida)
+  let buffer: Buffer
+  let contentType: string
+  let ext: string
   try {
-    const processada = await normalizarCapa(entrada)
-    const caminho = `${slug}-${Date.now().toString(36)}.jpg`
+    buffer = await normalizarCapa(entrada)
+    contentType = 'image/jpeg'
+    ext = 'jpg'
+  } catch {
+    buffer = entrada
+    contentType = mimeOriginal
+    ext = extDoMime(mimeOriginal)
+  }
 
+  try {
+    const caminho = `${slug}-${Date.now().toString(36)}.${ext}`
     const { error: upErr } = await supabase.storage
       .from('capas')
-      .upload(caminho, processada, { contentType: 'image/jpeg', upsert: true })
+      .upload(caminho, buffer, { contentType, upsert: true })
     if (upErr) throw new Error(upErr.message)
 
     const capaUrl = supabase.storage.from('capas').getPublicUrl(caminho).data.publicUrl
 
-    // Se foi reprocessamento de existente, já atualiza o registro
+    // Reprocessamento de existente → já atualiza o registro
     if (ebookId && !(capa && capa.size > 0)) {
       await supabase.from('loja_ebooks').update({ capa_url: capaUrl }).eq('id', ebookId)
     }
 
     return NextResponse.json({ capaUrl })
   } catch (e) {
-    const msg = e instanceof Error ? e.message : 'Erro ao processar a capa'
+    const msg = e instanceof Error ? e.message : 'Erro ao salvar a capa'
     return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
