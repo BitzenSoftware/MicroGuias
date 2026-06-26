@@ -46,29 +46,30 @@ export function EbookEditForm({
       let capaUrl: string | null = null
       let pdfPath: string | null = null
 
-      // Se houver arquivos novos, envia direto ao Storage (reusa o slug)
-      if (capa || pdf) {
-        const capaExt = capa ? capa.name.split('.').pop() || 'jpg' : undefined
+      // PDF novo → direto ao Storage (arquivo grande)
+      if (pdf) {
         const r = await fetch('/api/admin/upload-url', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slug: ebook.slug, capaExt, temCapa: !!capa, temPdf: !!pdf }),
+          body: JSON.stringify({ slug: ebook.slug, temCapa: false, temPdf: true }),
         })
         const u = await r.json()
         if (!r.ok) throw new Error(u.error || 'Falha ao preparar upload')
-
         const supabase = createClient()
+        const up = await supabase.storage.from('pdfs').uploadToSignedUrl(u.pdf.path, u.pdf.token, pdf)
+        if (up.error) throw new Error('Falha ao enviar o PDF: ' + up.error.message)
+        pdfPath = u.pdf.path
+      }
 
-        if (pdf && u.pdf) {
-          const up = await supabase.storage.from('pdfs').uploadToSignedUrl(u.pdf.path, u.pdf.token, pdf)
-          if (up.error) throw new Error('Falha ao enviar o PDF: ' + up.error.message)
-          pdfPath = u.pdf.path
-        }
-        if (capa && u.capa) {
-          const up = await supabase.storage.from('capas').uploadToSignedUrl(u.capa.path, u.capa.token, capa)
-          if (up.error) throw new Error('Falha ao enviar a capa: ' + up.error.message)
-          capaUrl = u.capaUrl
-        }
+      // Capa nova → processador (fundo branco + enquadrar em 3:4)
+      if (capa) {
+        const fd = new FormData()
+        fd.append('capa', capa)
+        fd.append('slug', ebook.slug)
+        const rc = await fetch('/api/admin/processar-capa', { method: 'POST', body: fd })
+        const dc = await rc.json()
+        if (!rc.ok) throw new Error(dc.error || 'Falha ao processar a capa')
+        capaUrl = dc.capaUrl
       }
 
       const res = await fetch('/api/admin/atualizar-ebook', {

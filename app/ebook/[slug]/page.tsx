@@ -69,7 +69,7 @@ export default async function EbookPage({
               src={ebook.capa_url}
               alt={ebook.titulo}
               fill
-              className="object-contain p-2"
+              className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
               priority
             />
