@@ -67,18 +67,12 @@ export default async function MinhaContaPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-gray-900 line-clamp-2">{item.titulo}</p>
-                {item.token && !item.expirado ? (
-                  <a
-                    href={`/api/download/${item.token}`}
-                    className="inline-block mt-2 bg-indigo-600 text-white text-sm px-4 py-1.5 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
-                  >
-                    📥 Baixar PDF
-                  </a>
-                ) : (
-                  <p className="text-xs text-amber-600 mt-2">
-                    {item.expirado ? 'Link de download expirado' : 'Indisponível'}
-                  </p>
-                )}
+                <Link
+                  href="/biblioteca"
+                  className="inline-block mt-2 bg-indigo-600 text-white text-sm px-4 py-1.5 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                >
+                  📖 Ler na Biblioteca
+                </Link>
               </div>
             </div>
           ))}

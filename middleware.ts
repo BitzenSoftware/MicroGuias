@@ -27,10 +27,12 @@ export async function middleware(request: NextRequest) {
 
   const isAdmin = request.nextUrl.pathname.startsWith('/admin')
   const isDownloads = request.nextUrl.pathname.startsWith('/downloads')
+  const isBiblioteca = request.nextUrl.pathname.startsWith('/biblioteca')
+  const isMinhaConta = request.nextUrl.pathname.startsWith('/minha-conta')
   const isAuth = request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/cadastro'
 
   // Rotas protegidas: requer login
-  if ((isAdmin || isDownloads) && !user) {
+  if ((isAdmin || isDownloads || isBiblioteca || isMinhaConta) && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
