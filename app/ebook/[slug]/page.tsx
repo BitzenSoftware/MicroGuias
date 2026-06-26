@@ -63,13 +63,13 @@ export default async function EbookPage({
     <div className="max-w-5xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
         {/* Capa */}
-        <div className="relative aspect-[3/4] bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden shadow-xl">
+        <div className="relative aspect-[3/4] bg-white rounded-2xl overflow-hidden shadow-xl border border-gray-100">
           {ebook.capa_url ? (
             <Image
               src={ebook.capa_url}
               alt={ebook.titulo}
               fill
-              className="object-cover"
+              className="object-contain p-2"
               sizes="(max-width: 768px) 100vw, 50vw"
               priority
             />

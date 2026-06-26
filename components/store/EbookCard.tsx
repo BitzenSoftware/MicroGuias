@@ -10,13 +10,13 @@ export function EbookCard({ ebook }: { ebook: Ebook }) {
     <Link href={`/ebook/${ebook.slug}`} className="group block">
       <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-100 hover:border-indigo-100">
         {/* Capa */}
-        <div className="relative aspect-[3/4] bg-gradient-to-br from-indigo-50 to-purple-50">
+        <div className="relative aspect-[3/4] bg-white">
           {ebook.capa_url ? (
             <Image
               src={ebook.capa_url}
               alt={ebook.titulo}
               fill
-              className="object-cover"
+              className="object-contain p-1"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />
           ) : (
