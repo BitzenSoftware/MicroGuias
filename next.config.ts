@@ -1,6 +1,8 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  // sharp é módulo nativo — manter externo para carregar no serverless da Vercel
+  serverExternalPackages: ['sharp'],
   images: {
     remotePatterns: [
       {

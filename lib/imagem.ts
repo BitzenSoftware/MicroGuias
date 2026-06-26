@@ -1,5 +1,3 @@
-import sharp from 'sharp'
-
 // Largura/altura alvo da capa padronizada (proporção 3:4)
 const LARGURA = 1000
 const ALTURA = 1333
@@ -11,6 +9,10 @@ const ALTURA = 1333
  * o erro propaga para quem chamou decidir o fallback.
  */
 export async function normalizarCapa(entrada: Buffer): Promise<Buffer> {
+  // Import dinâmico: se o sharp não carregar no ambiente, o erro é capturado
+  // por quem chamou, que então usa a imagem original (fallback).
+  const { default: sharp } = await import('sharp')
+
   // 1) Recorte do excesso de fundo — opcional
   let base: Buffer = entrada
   try {
