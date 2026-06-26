@@ -16,7 +16,7 @@ export function EbookCard({ ebook }: { ebook: Ebook }) {
               src={ebook.capa_url}
               alt={ebook.titulo}
               fill
-              className="object-cover"
+              className="object-contain p-1"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />
           ) : (

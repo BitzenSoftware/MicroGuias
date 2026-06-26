@@ -5,7 +5,6 @@ import { formatPreco } from '@/lib/utils'
 import type { Ebook } from '@/lib/types'
 import { TogglePublicado } from '@/components/admin/TogglePublicado'
 import { DeleteEbookButton } from '@/components/admin/DeleteEbookButton'
-import { ReprocessarCapaButton } from '@/components/admin/ReprocessarCapaButton'
 
 export default async function AdminEbooksPage() {
   // service-role: admin enxerga publicados E rascunhos (ignora RLS de publicado)
@@ -53,8 +52,6 @@ export default async function AdminEbooksPage() {
                 {ebook.pdf_url && (
                   <span className="text-xs text-gray-300" title="PDF gerado">📄</span>
                 )}
-
-                {ebook.capa_url && <ReprocessarCapaButton id={ebook.id} />}
 
                 <Link href={`/admin/ebooks/${ebook.id}`}
                   className="text-sm font-medium text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors">

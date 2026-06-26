@@ -33,28 +33,25 @@ export function EbookForm({ categorias }: { categorias: Categoria[] }) {
       const r = await fetch('/api/admin/upload-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ titulo, temCapa: false, temPdf: true }),
+        body: JSON.stringify({ titulo, capaExt: capa ? capa.name.split('.').pop() || 'jpg' : undefined, temCapa: !!capa, temPdf: true }),
       })
       const u = await r.json()
       if (!r.ok) throw new Error(u.error || 'Falha ao preparar upload')
 
-      // 2) Envia o PDF direto ao Storage (sem limite de 4,5 MB)
+      // 2) Envia PDF e capa direto ao Storage (sem limite de 4,5 MB)
       const supabase = createClient()
       const upPdf = await supabase.storage
         .from('pdfs')
         .uploadToSignedUrl(u.pdf.path, u.pdf.token, pdf)
       if (upPdf.error) throw new Error('Falha ao enviar o PDF: ' + upPdf.error.message)
 
-      // 3) Capa passa pelo processador (fundo branco + enquadrar em 3:4)
       let capaUrl: string | null = null
-      if (capa) {
-        const fd = new FormData()
-        fd.append('capa', capa)
-        fd.append('slug', u.slug)
-        const rc = await fetch('/api/admin/processar-capa', { method: 'POST', body: fd })
-        const dc = await rc.json()
-        if (!rc.ok) throw new Error(dc.error || 'Falha ao processar a capa')
-        capaUrl = dc.capaUrl
+      if (capa && u.capa) {
+        const upCapa = await supabase.storage
+          .from('capas')
+          .uploadToSignedUrl(u.capa.path, u.capa.token, capa)
+        if (upCapa.error) throw new Error('Falha ao enviar a capa: ' + upCapa.error.message)
+        capaUrl = u.capaUrl
       }
 
       // 3) Cria o registro do ebook
