@@ -23,7 +23,7 @@ export function AmostraReader({ item }: { item: CartItem }) {
       <p className="text-3xl font-bold text-indigo-600">{formatPreco(item.preco_centavos)}</p>
       <div className="flex flex-col gap-2">
         <AddToCartButton item={item} comprarAgora />
-        <AddToCartButton item={item} />
+        <AddToCartButton item={item} aposAdicionar="/" />
       </div>
       <p className="text-xs text-gray-400">Acesso imediato após o pagamento · leitura online</p>
     </div>

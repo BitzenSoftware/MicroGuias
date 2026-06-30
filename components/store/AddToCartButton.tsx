@@ -6,16 +6,20 @@ import { useCart, type CartItem } from '@/lib/cart'
 export function AddToCartButton({
   item,
   comprarAgora = false,
+  aposAdicionar,
 }: {
   item: CartItem
   comprarAgora?: boolean
+  /** Se definido, navega para esta rota após adicionar (ex.: fechar a amostra) */
+  aposAdicionar?: string
 }) {
   const router = useRouter()
   const { adicionar, temNoCarrinho } = useCart()
   const noCarrinho = temNoCarrinho(item.id)
 
   function handleAdicionar() {
-    adicionar(item)
+    if (!noCarrinho) adicionar(item)
+    if (aposAdicionar) router.push(aposAdicionar)
   }
 
   function handleComprar() {
@@ -39,10 +43,10 @@ export function AddToCartButton({
     <button
       type="button"
       onClick={handleAdicionar}
-      disabled={noCarrinho}
+      disabled={noCarrinho && !aposAdicionar}
       className="w-full bg-indigo-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-indigo-700 transition-colors cursor-pointer disabled:bg-green-600 disabled:cursor-default"
     >
-      {noCarrinho ? '✓ No carrinho' : 'Adicionar ao Carrinho'}
+      {noCarrinho ? (aposAdicionar ? '✓ No carrinho · continuar' : '✓ No carrinho') : 'Adicionar ao Carrinho'}
     </button>
   )
 }
