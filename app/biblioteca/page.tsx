@@ -28,9 +28,10 @@ export default async function BibliotecaPage() {
       .select('id, titulo, capa_url, pdf_url')
       .not('pdf_url', 'is', null)
       .order('titulo')
-    ebooks = (data ?? []).map((e) => ({ id: e.id, titulo: e.titulo, capa_url: e.capa_url }))
+    ebooks = (data ?? []).map((e) => ({ id: e.id, titulo: e.titulo, capa_url: e.capa_url, temPdf: true }))
   } else {
-    // Cliente lê só o que comprou (pedido pago)
+    // Cliente vê TUDO que comprou (pedido pago) — mesmo sem PDF ainda,
+    // pra nunca "sumir" um item pago. Sem PDF aparece como "em preparação".
     const { data } = await supabase
       .from('loja_pedido_itens')
       .select('loja_ebooks!inner(id, titulo, capa_url, pdf_url), loja_pedidos!inner(user_id, status)')
@@ -40,9 +41,9 @@ export default async function BibliotecaPage() {
     const vistos = new Set<string>()
     for (const row of data ?? []) {
       const e = row.loja_ebooks as unknown as { id: string; titulo: string; capa_url: string | null; pdf_url: string | null }
-      if (!e || !e.pdf_url || vistos.has(e.id)) continue
+      if (!e || vistos.has(e.id)) continue
       vistos.add(e.id)
-      ebooks.push({ id: e.id, titulo: e.titulo, capa_url: e.capa_url })
+      ebooks.push({ id: e.id, titulo: e.titulo, capa_url: e.capa_url, temPdf: !!e.pdf_url })
     }
     ebooks.sort((a, b) => a.titulo.localeCompare(b.titulo))
   }

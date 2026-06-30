@@ -14,6 +14,7 @@ export type EbookBiblioteca = {
   id: string
   titulo: string
   capa_url: string | null
+  temPdf: boolean
 }
 
 export function Leitor({ ebooks }: { ebooks: EbookBiblioteca[] }) {
@@ -64,8 +65,15 @@ export function Leitor({ ebooks }: { ebooks: EbookBiblioteca[] }) {
                       <div className="absolute inset-0 flex items-center justify-center text-lg">📖</div>
                     )}
                   </div>
-                  <span className={`text-sm leading-snug line-clamp-3 ${ativo ? 'text-indigo-700 font-medium' : 'text-gray-700'}`}>
-                    {e.titulo}
+                  <span className="min-w-0">
+                    <span className={`block text-sm leading-snug line-clamp-3 ${ativo ? 'text-indigo-700 font-medium' : 'text-gray-700'}`}>
+                      {e.titulo}
+                    </span>
+                    {!e.temPdf && (
+                      <span className="mt-0.5 inline-block text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-100 rounded px-1.5 py-0.5">
+                        em preparação
+                      </span>
+                    )}
                   </span>
                 </button>
               )
@@ -77,7 +85,20 @@ export function Leitor({ ebooks }: { ebooks: EbookBiblioteca[] }) {
       {/* Coluna direita: leitor */}
       <section className="flex-1 min-w-0">
         {selecionado ? (
-          <PdfReader key={selecionado.id} ebookId={selecionado.id} />
+          selecionado.temPdf ? (
+            <PdfReader key={selecionado.id} ebookId={selecionado.id} />
+          ) : (
+            <div className="h-full flex items-center justify-center text-center text-gray-500 p-8">
+              <div className="max-w-sm">
+                <p className="text-4xl mb-3">🛠️</p>
+                <p className="font-semibold text-gray-700">Conteúdo em preparação</p>
+                <p className="text-sm mt-1">
+                  Este ebook ainda está sendo finalizado. Seu acesso já está garantido —
+                  assim que o conteúdo for publicado, ele aparecerá aqui para leitura.
+                </p>
+              </div>
+            </div>
+          )
         ) : (
           <div className="h-full flex items-center justify-center text-center text-gray-400">
             <div>

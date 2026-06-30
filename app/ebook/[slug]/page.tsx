@@ -43,6 +43,7 @@ export default async function EbookPage({
     .select('*, loja_categorias(id, nome, slug, icone_emoji)')
     .eq('slug', slug)
     .eq('publicado', true)
+    .not('pdf_url', 'is', null)
     .single()
 
   if (!ebook) return notFound()

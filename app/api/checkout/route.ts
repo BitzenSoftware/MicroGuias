@@ -29,15 +29,26 @@ export async function POST(request: Request) {
 
   const supabase = createServiceClient()
 
-  // 2) Busca os ebooks (preços confiáveis do servidor)
+  // 2) Busca os ebooks (preços confiáveis do servidor).
+  //    Só vende o que está publicado E tem PDF entregável.
   const { data: ebooks, error: ebErr } = await supabase
     .from('loja_ebooks')
-    .select('id, titulo, preco_centavos, publicado')
+    .select('id, titulo, preco_centavos, publicado, pdf_url')
     .in('id', ids)
     .eq('publicado', true)
+    .not('pdf_url', 'is', null)
 
   if (ebErr || !ebooks || ebooks.length === 0) {
     return NextResponse.json({ error: 'Ebooks indisponíveis' }, { status: 400 })
+  }
+
+  // Se algum item do carrinho não está vendável, recusa o pedido inteiro
+  // (evita cobrar valor diferente do carrinho ou entregar a menos).
+  if (ebooks.length !== ids.length) {
+    return NextResponse.json(
+      { error: 'Um dos ebooks ficou indisponível. Atualize o carrinho e tente novamente.' },
+      { status: 409 }
+    )
   }
 
   // 3) Calcula totais

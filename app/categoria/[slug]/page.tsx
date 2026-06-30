@@ -47,14 +47,16 @@ export default async function CategoriaPage({
     .from('loja_ebooks')
     .select('*, loja_categorias(id, nome, slug, icone_emoji, ordem)')
     .eq('publicado', true)
+    .not('pdf_url', 'is', null)
     .eq('categoria_id', categoria.id)
     .order('criado_em', { ascending: false })
 
-  // Só mostra no filtro categorias que têm ebook publicado
+  // Só mostra no filtro categorias que têm ebook publicado com PDF
   const { data: publicados } = await supabase
     .from('loja_ebooks')
     .select('categoria_id')
     .eq('publicado', true)
+    .not('pdf_url', 'is', null)
   const idsComEbook = new Set((publicados ?? []).map((e) => e.categoria_id))
   const categoriasVisiveis = (categorias ?? []).filter((c) => idsComEbook.has(c.id))
 
