@@ -20,7 +20,8 @@ export function PdfReader({
   const [erro, setErro] = useState<string | null>(null)
   const [numPages, setNumPages] = useState(0)
   const [pagina, setPagina] = useState(1)
-  const [largura, setLargura] = useState(700)
+  const [area, setArea] = useState({ w: 700, h: 900 })
+  const [ratio, setRatio] = useState(0.77) // largura/altura da página (estimativa inicial)
 
   // Em amostra há um "slide" extra no fim: o paywall
   const totalSlides = numPages + (amostra ? 1 : 0)
@@ -32,13 +33,11 @@ export function PdfReader({
     setNumPages(0)
     setPagina(1)
 
-    // Amostra: o próprio endpoint devolve o PDF fatiado (público)
     if (amostra) {
       setUrl(`/api/amostra/${ebookId}`)
       return
     }
 
-    // Completo: URL assinada após validar a posse no servidor
     let ativo = true
     setUrl(null)
     fetch(`/api/ler/${ebookId}`)
@@ -51,11 +50,11 @@ export function PdfReader({
     return () => { ativo = false }
   }, [ebookId, amostra])
 
-  // Página ocupa toda a largura disponível do lado direito
+  // Mede a área disponível (largura e altura)
   useEffect(() => {
     const el = areaRef.current
     if (!el) return
-    const medir = () => setLargura(Math.max(320, el.clientWidth - 48))
+    const medir = () => setArea({ w: el.clientWidth, h: el.clientHeight })
     medir()
     const ro = new ResizeObserver(medir)
     ro.observe(el)
@@ -75,6 +74,13 @@ export function PdfReader({
   const anterior = () => setPagina((p) => Math.max(p - 1, 1))
   const proxima = () => setPagina((p) => Math.min(p + 1, totalSlides))
 
+  // Enquadra a página inteira: limita pela largura E pela altura disponíveis
+  const pad = 32
+  const larguraPagina = Math.max(
+    280,
+    Math.min(area.w - pad, (area.h - pad) * ratio)
+  )
+
   return (
     <div className="h-full flex flex-col" onContextMenu={(e) => e.preventDefault()}>
       {amostra && (
@@ -83,27 +89,27 @@ export function PdfReader({
         </div>
       )}
 
-      {/* Área da página (preenche o espaço) */}
+      {/* Área da página (preenche o espaço, centralizada) */}
       <div
         ref={areaRef}
-        className="flex-1 min-h-0 overflow-auto bg-gray-100 select-none flex justify-center py-6 px-4"
+        className="flex-1 min-h-0 overflow-auto bg-gray-100 select-none flex items-center justify-center p-4"
       >
         {erro && (
-          <div className="m-auto text-center">
+          <div className="text-center">
             <p className="text-4xl mb-3">🔒</p>
             <p className="text-gray-600">{erro}</p>
           </div>
         )}
 
         {!erro && !url && (
-          <div className="m-auto text-center text-gray-400">
+          <div className="text-center text-gray-400">
             <p className="text-3xl mb-2 animate-pulse">📖</p>
             <p className="text-sm">Abrindo ebook…</p>
           </div>
         )}
 
         {/* Slide de paywall (fim da amostra) */}
-        {noPaywall && <div className="m-auto w-full max-w-md">{paywall}</div>}
+        {noPaywall && <div className="w-full max-w-md">{paywall}</div>}
 
         {url && !noPaywall && (
           <Document
@@ -111,16 +117,21 @@ export function PdfReader({
             onLoadSuccess={({ numPages }) => setNumPages(numPages)}
             onLoadError={() => setErro('Não foi possível carregar o PDF.')}
             loading={
-              <div className="m-auto text-center text-gray-400 py-10">
+              <div className="text-center text-gray-400 py-10">
                 <p className="text-3xl mb-2 animate-pulse">📖</p>
                 <p className="text-sm">Carregando…</p>
               </div>
             }
           >
-            <div className="shadow-lg rounded-md overflow-hidden bg-white h-fit">
+            <div className="shadow-lg rounded-md overflow-hidden bg-white">
               <Page
                 pageNumber={Math.min(pagina, numPages || 1)}
-                width={largura}
+                width={larguraPagina}
+                onLoadSuccess={(page) => {
+                  if (page.originalWidth && page.originalHeight) {
+                    setRatio(page.originalWidth / page.originalHeight)
+                  }
+                }}
                 renderTextLayer={false}
                 renderAnnotationLayer={false}
               />

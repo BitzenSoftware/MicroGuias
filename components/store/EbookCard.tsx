@@ -7,8 +7,8 @@ export function EbookCard({ ebook }: { ebook: Ebook }) {
   const categoria = ebook.loja_categorias
 
   return (
-    <Link href={`/ebook/${ebook.slug}`} className="group block">
-      <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-100 hover:border-indigo-100">
+    <div className="group flex flex-col bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-100 hover:border-indigo-100">
+      <Link href={`/ebook/${ebook.slug}`} className="block">
         {/* Capa */}
         <div className="relative aspect-[3/4] bg-white">
           {ebook.capa_url ? (
@@ -27,7 +27,7 @@ export function EbookCard({ ebook }: { ebook: Ebook }) {
         </div>
 
         {/* Informações */}
-        <div className="p-4">
+        <div className="p-4 pb-2">
           {categoria && (
             <span className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-600 mb-1.5">
               {categoria.icone_emoji} {categoria.nome}
@@ -53,7 +53,15 @@ export function EbookCard({ ebook }: { ebook: Ebook }) {
             </span>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+
+      {/* Amostra grátis (link separado, fora do anchor principal) */}
+      <Link
+        href={`/amostra/${ebook.slug}`}
+        className="mt-auto mx-4 mb-4 text-center text-xs font-medium text-indigo-600 border border-indigo-100 bg-indigo-50/50 rounded-lg py-2 hover:bg-indigo-50 transition-colors"
+      >
+        📖 Ler amostra grátis
+      </Link>
+    </div>
   )
 }

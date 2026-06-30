@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
@@ -26,6 +26,10 @@ export default async function AmostraPage({
 }) {
   const { slug } = await params
   const supabase = await createClient()
+
+  // Captura de e-mail: precisa estar cadastrado/logado para ler a amostra
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect(`/cadastro?next=/amostra/${slug}`)
 
   const { data: ebook } = await supabase
     .from('loja_ebooks')

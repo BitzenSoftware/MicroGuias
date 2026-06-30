@@ -21,10 +21,20 @@ export default function LoginPage() {
     if (erroUrl) setErro(decodeURIComponent(erroUrl))
   }, [])
 
+  function getNext() {
+    if (typeof window === 'undefined') return null
+    const n = new URLSearchParams(window.location.search).get('next')
+    return n && n.startsWith('/') ? n : null
+  }
+
   async function handleGoogle() {
+    const next = getNext()
+    const redirectTo = next
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
+      : `${window.location.origin}/auth/callback`
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo },
     })
   }
 
@@ -41,19 +51,19 @@ export default function LoginPage() {
       return
     }
 
-    // Redireciona admin para painel, customer para home
+    // Redireciona para o destino (next), ou admin→painel, customer→home
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      const { data: perfil } = await supabase
-        .from('loja_perfis')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-      if (perfil?.role === 'admin') {
-        router.push('/admin')
+      const next = getNext()
+      if (next) {
+        router.push(next)
       } else {
-        router.push('/')
+        const { data: perfil } = await supabase
+          .from('loja_perfis')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        router.push(perfil?.role === 'admin' ? '/admin' : '/')
       }
       router.refresh()
     }

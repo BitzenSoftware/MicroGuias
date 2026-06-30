@@ -1,18 +1,29 @@
 import { NextResponse } from 'next/server'
 import { PDFDocument } from 'pdf-lib'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
 
+// Quantas páginas a amostra libera
+const PAGINAS_AMOSTRA = 3
+
 /**
  * Amostra grátis: devolve um PDF com APENAS as primeiras páginas.
- * Público (sem login). O ebook completo nunca sai do servidor — só a fatia.
+ * Exige login (captura de e-mail). O ebook completo nunca sai do servidor.
  */
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ ebookId: string }> }
 ) {
   const { ebookId } = await params
+
+  // Precisa estar logado (já capturamos o e-mail no cadastro)
+  const auth = await createClient()
+  const { data: { user } } = await auth.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: 'Cadastre-se para ler a amostra' }, { status: 401 })
+  }
+
   const supabase = createServiceClient()
 
   // Só ebooks publicados (não vaza rascunho)
@@ -37,9 +48,7 @@ export async function GET(
     const bytes = new Uint8Array(await blob.arrayBuffer())
     const original = await PDFDocument.load(bytes)
     const total = original.getPageCount()
-
-    // ~20% das páginas, no mínimo 2 e no máximo 4
-    const nAmostra = Math.min(total, Math.max(2, Math.min(4, Math.ceil(total * 0.2))))
+    const nAmostra = Math.min(total, PAGINAS_AMOSTRA)
 
     const amostra = await PDFDocument.create()
     const indices = Array.from({ length: nAmostra }, (_, i) => i)

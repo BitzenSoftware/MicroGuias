@@ -41,17 +41,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?erro=${encodeURIComponent('exchange: ' + error.message)}`)
   }
 
-  // Decide o destino conforme a role do utilizador.
-  let destino = '/'
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) {
-    const { data: perfil } = await supabase
-      .from('loja_perfis')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+  // Destino: ?next= (ex.: voltar à amostra) tem prioridade; senão, role.
+  const nextParam = searchParams.get('next')
+  let destino = nextParam && nextParam.startsWith('/') ? nextParam : '/'
 
-    if (perfil?.role === 'admin') destino = '/admin'
+  if (!nextParam) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: perfil } = await supabase
+        .from('loja_perfis')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (perfil?.role === 'admin') destino = '/admin'
+    }
   }
 
   // Grava os cookies de sessão DIRETAMENTE na resposta de redirect.

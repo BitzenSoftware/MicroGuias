@@ -16,10 +16,17 @@ export default function CadastroPage() {
   const [sucesso, setSucesso] = useState(false)
   const [carregando, setCarregando] = useState(false)
 
+  function getNext() {
+    if (typeof window === 'undefined') return '/'
+    const n = new URLSearchParams(window.location.search).get('next')
+    return n && n.startsWith('/') ? n : '/'
+  }
+
   async function handleGoogle() {
+    const next = encodeURIComponent(getNext())
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${next}` },
     })
   }
 
@@ -46,7 +53,7 @@ export default function CadastroPage() {
     // Se confirmação de email estiver desativada no Supabase, redireciona direto
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      router.push('/')
+      router.push(getNext())
       router.refresh()
     } else {
       setSucesso(true)
@@ -155,7 +162,7 @@ export default function CadastroPage() {
 
         <p className="text-center text-sm text-gray-400 mt-4">
           Já tem conta?{' '}
-          <Link href="/login" className="text-indigo-600 font-medium hover:underline">
+          <Link href={`/login?next=${encodeURIComponent(getNext())}`} className="text-indigo-600 font-medium hover:underline">
             Entrar
           </Link>
         </p>
