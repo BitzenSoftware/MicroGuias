@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { useCart } from '@/lib/cart'
 
 interface Props {
   nome: string
@@ -16,9 +17,11 @@ interface Props {
 export function UserMenu({ nome, email, avatarUrl, isAdmin }: Props) {
   const router = useRouter()
   const supabase = createClient()
+  const { limpar } = useCart()
   const [aberto, setAberto] = useState(false)
 
   async function handleSair() {
+    limpar() // carrinho não vaza para o próximo usuário do navegador
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()
