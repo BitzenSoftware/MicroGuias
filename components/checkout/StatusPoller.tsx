@@ -13,7 +13,7 @@ export function StatusPoller({
   statusInicial: string
 }) {
   const router = useRouter()
-  const { limpar } = useCart()
+  const { limpar, carregado } = useCart()
   const [status, setStatus] = useState(statusInicial)
   const limpouRef = useRef(false)
 
@@ -30,14 +30,15 @@ export function StatusPoller({
     return () => clearInterval(intervalo)
   }, [pedidoId, status])
 
-  // Limpa carrinho ao confirmar
+  // Limpa carrinho ao confirmar — só depois do carrinho carregar do
+  // localStorage, senão o load do CartProvider repõe os itens.
   useEffect(() => {
-    if (status === 'pago' && !limpouRef.current) {
+    if (status === 'pago' && carregado && !limpouRef.current) {
       limpouRef.current = true
       limpar()
       router.refresh()
     }
-  }, [status, limpar, router])
+  }, [status, carregado, limpar, router])
 
   if (status === 'pago') {
     return (
