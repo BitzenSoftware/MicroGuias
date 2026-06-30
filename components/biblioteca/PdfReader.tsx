@@ -6,7 +6,15 @@ import { Document, Page, pdfjs } from 'react-pdf'
 // Worker do pdf.js servido por CDN (evita configurar bundler)
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
-export function PdfReader({ ebookId }: { ebookId: string }) {
+export function PdfReader({
+  ebookId,
+  amostra = false,
+  paywall,
+}: {
+  ebookId: string
+  amostra?: boolean
+  paywall?: React.ReactNode
+}) {
   const areaRef = useRef<HTMLDivElement>(null)
   const [url, setUrl] = useState<string | null>(null)
   const [erro, setErro] = useState<string | null>(null)
@@ -14,13 +22,25 @@ export function PdfReader({ ebookId }: { ebookId: string }) {
   const [pagina, setPagina] = useState(1)
   const [largura, setLargura] = useState(700)
 
-  // Busca a URL assinada de leitura a cada troca de ebook
+  // Em amostra há um "slide" extra no fim: o paywall
+  const totalSlides = numPages + (amostra ? 1 : 0)
+  const noPaywall = amostra && numPages > 0 && pagina > numPages
+
+  // Resolve a fonte do PDF a cada troca de ebook
   useEffect(() => {
-    let ativo = true
-    setUrl(null)
     setErro(null)
     setNumPages(0)
     setPagina(1)
+
+    // Amostra: o próprio endpoint devolve o PDF fatiado (público)
+    if (amostra) {
+      setUrl(`/api/amostra/${ebookId}`)
+      return
+    }
+
+    // Completo: URL assinada após validar a posse no servidor
+    let ativo = true
+    setUrl(null)
     fetch(`/api/ler/${ebookId}`)
       .then(async (r) => {
         const data = await r.json()
@@ -29,7 +49,7 @@ export function PdfReader({ ebookId }: { ebookId: string }) {
       })
       .catch((e) => ativo && setErro(e.message))
     return () => { ativo = false }
-  }, [ebookId])
+  }, [ebookId, amostra])
 
   // Página ocupa toda a largura disponível do lado direito
   useEffect(() => {
@@ -42,21 +62,27 @@ export function PdfReader({ ebookId }: { ebookId: string }) {
     return () => ro.disconnect()
   }, [])
 
-  // Setas do teclado navegam as páginas
+  // Setas do teclado navegam os slides
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'ArrowRight') setPagina((p) => Math.min(p + 1, numPages))
+      if (e.key === 'ArrowRight') setPagina((p) => Math.min(p + 1, totalSlides))
       if (e.key === 'ArrowLeft') setPagina((p) => Math.max(p - 1, 1))
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [numPages])
+  }, [totalSlides])
 
   const anterior = () => setPagina((p) => Math.max(p - 1, 1))
-  const proxima = () => setPagina((p) => Math.min(p + 1, numPages))
+  const proxima = () => setPagina((p) => Math.min(p + 1, totalSlides))
 
   return (
     <div className="h-full flex flex-col" onContextMenu={(e) => e.preventDefault()}>
+      {amostra && (
+        <div className="bg-amber-50 border-b border-amber-100 text-amber-800 text-xs font-medium text-center py-2 px-4">
+          🔓 Você está lendo uma amostra grátis das primeiras páginas
+        </div>
+      )}
+
       {/* Área da página (preenche o espaço) */}
       <div
         ref={areaRef}
@@ -76,7 +102,10 @@ export function PdfReader({ ebookId }: { ebookId: string }) {
           </div>
         )}
 
-        {url && (
+        {/* Slide de paywall (fim da amostra) */}
+        {noPaywall && <div className="m-auto w-full max-w-md">{paywall}</div>}
+
+        {url && !noPaywall && (
           <Document
             file={url}
             onLoadSuccess={({ numPages }) => setNumPages(numPages)}
@@ -90,7 +119,7 @@ export function PdfReader({ ebookId }: { ebookId: string }) {
           >
             <div className="shadow-lg rounded-md overflow-hidden bg-white h-fit">
               <Page
-                pageNumber={pagina}
+                pageNumber={Math.min(pagina, numPages || 1)}
                 width={largura}
                 renderTextLayer={false}
                 renderAnnotationLayer={false}
@@ -112,17 +141,18 @@ export function PdfReader({ ebookId }: { ebookId: string }) {
             ‹ Anterior
           </button>
 
-          <span className="text-sm text-gray-500 tabular-nums min-w-24 text-center">
-            Página {pagina} de {numPages}
+          <span className="text-sm text-gray-500 tabular-nums min-w-28 text-center">
+            {noPaywall ? 'Fim da amostra' : `Página ${pagina} de ${numPages}`}
+            {amostra && !noPaywall ? ' (amostra)' : ''}
           </span>
 
           <button
             type="button"
             onClick={proxima}
-            disabled={pagina >= numPages}
+            disabled={pagina >= totalSlides}
             className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
           >
-            Próxima ›
+            {amostra && pagina === numPages ? '🔒 Continuar' : 'Próxima ›'}
           </button>
         </div>
       )}

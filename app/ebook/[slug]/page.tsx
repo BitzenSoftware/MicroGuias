@@ -117,6 +117,12 @@ export default async function EbookPage({
             <div className="flex flex-col gap-3">
               <AddToCartButton item={itemCarrinho} />
               <AddToCartButton item={itemCarrinho} comprarAgora />
+              <Link
+                href={`/amostra/${ebook.slug}`}
+                className="w-full text-center text-indigo-600 font-medium py-2 hover:underline"
+              >
+                📖 Ler amostra grátis
+              </Link>
             </div>
           </div>
 
