@@ -1,10 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { CategoryFilter } from '@/components/store/CategoryFilter'
 import { EbookCard } from '@/components/store/EbookCard'
+import { ComboCard } from '@/components/store/ComboCard'
+import { listarPromocoesAtivas } from '@/lib/promocoes'
 import type { Ebook } from '@/lib/types'
 
 export default async function HomePage() {
   const supabase = await createClient()
+
+  const promocoes = await listarPromocoesAtivas(supabase)
 
   const [{ data: categorias }, { data: ebooks }] = await Promise.all([
     supabase
@@ -37,6 +41,21 @@ export default async function HomePage() {
           🎁 Compre 2 ou mais ebooks e ganhe <strong>10% de desconto</strong>
         </div>
       </div>
+
+      {/* Combos / Promoções */}
+      {promocoes.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-gray-900">🔥 Combos & Ofertas</h2>
+            <span className="text-sm text-gray-400">leve mais, pague menos</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {promocoes.map((promo) => (
+              <ComboCard key={promo.id} promo={promo} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Filtro de categorias */}
       <CategoryFilter categorias={categoriasVisiveis} />

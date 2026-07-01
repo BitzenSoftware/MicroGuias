@@ -23,6 +23,17 @@ export type Ebook = {
   loja_categorias: Categoria | null
 }
 
+export type Promocao = {
+  id: string
+  nome: string
+  slug: string
+  descricao: string | null
+  preco_centavos: number
+  capa_url: string | null
+  ativo: boolean
+  criado_em: string
+}
+
 // Conteúdo estruturado gerado pelo Gemini
 export type Capitulo = {
   titulo: string
