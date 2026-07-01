@@ -76,10 +76,13 @@ export default function CarrinhoPage() {
             <button
               type="button"
               onClick={() => remover(item.id)}
-              className="text-gray-300 hover:text-red-500 transition-colors p-2 cursor-pointer"
-              title="Remover"
+              className="flex items-center gap-1.5 flex-shrink-0 text-sm font-medium text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 rounded-lg px-3 py-2 transition-colors cursor-pointer"
+              title="Remover do carrinho"
             >
-              ✕
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6" />
+              </svg>
+              <span className="hidden sm:inline">Remover</span>
             </button>
           </div>
         ))}
