@@ -34,7 +34,8 @@ export function PdfReader({
     setPagina(1)
 
     if (amostra) {
-      setUrl(`/api/amostra/${ebookId}`)
+      // carimbo de tempo evita servir uma amostra antiga do cache do navegador
+      setUrl(`/api/amostra/${ebookId}?t=${Date.now()}`)
       return
     }
 

@@ -63,7 +63,8 @@ export async function GET(
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': 'inline',
-        'Cache-Control': 'public, max-age=3600',
+        // Sem cache: se o admin troca o PDF, a amostra reflete na hora.
+        'Cache-Control': 'no-store, must-revalidate',
         'X-Total-Pages': String(total),
         'X-Sample-Pages': String(nAmostra),
       },
