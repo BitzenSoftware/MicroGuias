@@ -23,6 +23,7 @@ export function EbookEditForm({
   const [capa, setCapa] = useState<File | null>(null)
   const [pdf, setPdf] = useState<File | null>(null)
   const [previewCapa, setPreviewCapa] = useState<string | null>(null)
+  const [publicado, setPublicado] = useState(ebook.publicado)
 
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -82,6 +83,7 @@ export function EbookEditForm({
           descricao_longa: descricaoLonga,
           capa_url: capaUrl,
           pdf_path: pdfPath,
+          publicado,
         }),
       })
       const data = await res.json()
@@ -120,6 +122,26 @@ export function EbookEditForm({
               className="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 file:text-sm file:font-medium hover:file:bg-indigo-100" />
             {capa && <p className="text-xs text-green-600 mt-2">Nova capa: {capa.name}</p>}
           </div>
+        </div>
+
+        {/* Status na loja: ativo/inativo */}
+        <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50/60 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-gray-800">Status na loja</p>
+            <p className="text-xs text-gray-400">
+              {publicado ? 'Ativo — visível e à venda na loja.' : 'Inativo — oculto da loja (ninguém vê nem compra).'}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={publicado ? 'true' : 'false'}
+            onClick={() => setPublicado((v) => !v)}
+            className={`relative inline-flex h-7 w-12 flex-shrink-0 items-center rounded-full transition-colors cursor-pointer ${publicado ? 'bg-green-500' : 'bg-gray-300'}`}
+            title={publicado ? 'Desativar (ocultar da loja)' : 'Ativar (mostrar na loja)'}
+          >
+            <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${publicado ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
         </div>
 
         <div>

@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     descricao_longa?: string
     capa_url?: string | null
     pdf_path?: string | null
+    publicado?: boolean
   }
   try {
     b = await request.json()
@@ -40,6 +41,7 @@ export async function POST(request: Request) {
     descricao_curta: b.descricao_curta || null,
     descricao_longa: b.descricao_longa || null,
   }
+  if (typeof b.publicado === 'boolean') update.publicado = b.publicado
   // Só atualiza arquivos se vieram novos caminhos
   if (b.capa_url) update.capa_url = b.capa_url
   if (b.pdf_path) update.pdf_url = b.pdf_path
