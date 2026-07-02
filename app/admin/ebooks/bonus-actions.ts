@@ -36,6 +36,19 @@ export async function adicionarBonus(
   if (error) throw new Error(error.message)
 }
 
+export async function atualizarCapaBonus(bonusId: string, capaUrl: string) {
+  const admin = await getAdmin()
+  if (!admin) throw new Error('Não autorizado')
+  if (!capaUrl) throw new Error('Capa inválida.')
+
+  const supabase = createServiceClient()
+  const { error } = await supabase
+    .from('loja_ebook_bonus')
+    .update({ capa_url: capaUrl })
+    .eq('id', bonusId)
+  if (error) throw new Error(error.message)
+}
+
 export async function removerBonus(bonusId: string) {
   const admin = await getAdmin()
   if (!admin) throw new Error('Não autorizado')

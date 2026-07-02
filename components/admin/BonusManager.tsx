@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { adicionarBonus, removerBonus } from '@/app/admin/ebooks/bonus-actions'
+import { adicionarBonus, removerBonus, atualizarCapaBonus } from '@/app/admin/ebooks/bonus-actions'
 import type { EbookBonus } from '@/lib/types'
 
 export function BonusManager({
@@ -20,6 +20,34 @@ export function BonusManager({
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [removendo, setRemovendo] = useState<string | null>(null)
+  const [capaEnviando, setCapaEnviando] = useState<string | null>(null)
+  const capaRefs = useRef<Record<string, HTMLInputElement | null>>({})
+
+  async function enviarCapaExistente(bonusId: string, file: File) {
+    setErro(null)
+    setCapaEnviando(bonusId)
+    try {
+      const capaExt = file.name.split('.').pop() || 'jpg'
+      const r = await fetch('/api/admin/bonus-capa-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ebookId, capaExt }),
+      })
+      const u = await r.json()
+      if (!r.ok) throw new Error(u.error || 'Falha ao preparar upload')
+
+      const supabase = createClient()
+      const up = await supabase.storage.from('capas').uploadToSignedUrl(u.path, u.token, file)
+      if (up.error) throw new Error('Falha ao enviar a capa: ' + up.error.message)
+
+      await atualizarCapaBonus(bonusId, u.capaUrl)
+      setBonus((prev) => prev.map((b) => (b.id === bonusId ? { ...b, capa_url: u.capaUrl } : b)))
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Erro ao enviar a capa')
+    } finally {
+      setCapaEnviando(null)
+    }
+  }
 
   function escolher(f: File | null) {
     setArquivo(f)
@@ -109,6 +137,24 @@ export function BonusManager({
                 )}
               </div>
               <span className="flex-1 min-w-0 text-sm text-gray-800 truncate">{b.nome}</span>
+
+              <input
+                type="file"
+                accept="image/*"
+                title="Capa do bônus"
+                ref={(el) => { capaRefs.current[b.id] = el }}
+                onChange={(e) => {
+                  const f = e.target.files?.[0]
+                  if (f) enviarCapaExistente(b.id, f)
+                  e.target.value = ''
+                }}
+                className="hidden"
+              />
+              <button type="button" onClick={() => capaRefs.current[b.id]?.click()} disabled={capaEnviando === b.id}
+                className="text-xs font-medium text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded cursor-pointer disabled:opacity-50">
+                {capaEnviando === b.id ? 'Enviando…' : b.capa_url ? 'Trocar capa' : '+ Capa'}
+              </button>
+
               <button type="button" onClick={() => remover(b.id)} disabled={removendo === b.id}
                 className="text-xs font-medium text-red-600 hover:bg-red-50 px-2 py-1 rounded cursor-pointer disabled:opacity-50">
                 {removendo === b.id ? 'Removendo…' : 'Remover'}
