@@ -80,8 +80,9 @@ export default async function HomePage() {
               src="/hero-ebooks.png"
               alt="Coleção de ebooks Micro Guias"
               width={760}
-              height={430}
+              height={424}
               priority
+              unoptimized
               className="w-full h-auto max-w-xl"
             />
           </div>
