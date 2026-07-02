@@ -28,7 +28,7 @@ export default async function BibliotecaPage() {
       .select('id, titulo, capa_url, pdf_url')
       .not('pdf_url', 'is', null)
       .order('titulo')
-    ebooks = (data ?? []).map((e) => ({ id: e.id, titulo: e.titulo, capa_url: e.capa_url, temPdf: true }))
+    ebooks = (data ?? []).map((e) => ({ id: e.id, titulo: e.titulo, capa_url: e.capa_url, temPdf: true, bonus: [] }))
   } else {
     // Cliente vê TUDO que comprou (pedido pago) — mesmo sem PDF ainda,
     // pra nunca "sumir" um item pago. Sem PDF aparece como "em preparação".
@@ -43,9 +43,28 @@ export default async function BibliotecaPage() {
       const e = row.loja_ebooks as unknown as { id: string; titulo: string; capa_url: string | null; pdf_url: string | null }
       if (!e || vistos.has(e.id)) continue
       vistos.add(e.id)
-      ebooks.push({ id: e.id, titulo: e.titulo, capa_url: e.capa_url, temPdf: !!e.pdf_url })
+      ebooks.push({ id: e.id, titulo: e.titulo, capa_url: e.capa_url, temPdf: !!e.pdf_url, bonus: [] })
     }
     ebooks.sort((a, b) => a.titulo.localeCompare(b.titulo))
+  }
+
+  // Anexa os bônus (baixáveis) de cada ebook
+  if (ebooks.length > 0) {
+    const { data: bonusData } = await supabase
+      .from('loja_ebook_bonus')
+      .select('id, nome, ebook_id')
+      .in('ebook_id', ebooks.map((e) => e.id))
+      .order('criado_em')
+
+    if (bonusData && bonusData.length > 0) {
+      const porEbook = new Map<string, { id: string; nome: string }[]>()
+      for (const b of bonusData) {
+        const lista = porEbook.get(b.ebook_id) ?? []
+        lista.push({ id: b.id, nome: b.nome })
+        porEbook.set(b.ebook_id, lista)
+      }
+      ebooks = ebooks.map((e) => ({ ...e, bonus: porEbook.get(e.id) ?? [] }))
+    }
   }
 
   return (

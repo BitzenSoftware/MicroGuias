@@ -23,6 +23,14 @@ export type Ebook = {
   loja_categorias: Categoria | null
 }
 
+export type EbookBonus = {
+  id: string
+  ebook_id: string
+  nome: string
+  arquivo_path: string
+  criado_em: string
+}
+
 export type Promocao = {
   id: string
   nome: string

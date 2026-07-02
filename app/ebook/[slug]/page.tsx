@@ -48,6 +48,12 @@ export default async function EbookPage({
 
   if (!ebook) return notFound()
 
+  const { data: bonus } = await supabase
+    .from('loja_ebook_bonus')
+    .select('id, nome')
+    .eq('ebook_id', ebook.id)
+    .order('criado_em')
+
   const categoria = ebook.loja_categorias as {
     id: string; nome: string; slug: string; icone_emoji: string
   } | null
@@ -114,6 +120,15 @@ export default async function EbookPage({
             <p className="text-sm text-green-600 font-medium">
               💡 Leve 2+ ebooks e ganhe 10% de desconto no total
             </p>
+
+            {bonus && bonus.length > 0 && (
+              <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
+                <p className="text-sm font-semibold text-amber-800">🎁 Inclui {bonus.length} bônus para baixar:</p>
+                <ul className="mt-1 text-sm text-amber-700 list-disc list-inside">
+                  {bonus.map((b) => <li key={b.id}>{b.nome}</li>)}
+                </ul>
+              </div>
+            )}
 
             <div className="flex flex-col gap-3">
               <AddToCartButton item={itemCarrinho} />

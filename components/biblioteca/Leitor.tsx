@@ -15,6 +15,7 @@ export type EbookBiblioteca = {
   titulo: string
   capa_url: string | null
   temPdf: boolean
+  bonus: { id: string; nome: string }[]
 }
 
 export function Leitor({ ebooks }: { ebooks: EbookBiblioteca[] }) {
@@ -82,8 +83,24 @@ export function Leitor({ ebooks }: { ebooks: EbookBiblioteca[] }) {
         </div>
       </aside>
 
-      {/* Coluna direita: leitor */}
-      <section className="flex-1 min-w-0">
+      {/* Coluna direita: leitor + bônus */}
+      <section className="flex-1 min-w-0 flex flex-col">
+        {selecionado && selecionado.bonus.length > 0 && (
+          <div className="border-b border-gray-100 bg-amber-50/70 px-4 py-2.5 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-amber-800">🎁 Bônus:</span>
+            {selecionado.bonus.map((b) => (
+              <a
+                key={b.id}
+                href={`/api/bonus/${b.id}`}
+                className="inline-flex items-center gap-1 text-xs font-medium text-amber-800 bg-white border border-amber-200 rounded-lg px-2.5 py-1 hover:bg-amber-100 transition-colors"
+              >
+                📥 {b.nome}
+              </a>
+            ))}
+          </div>
+        )}
+
+        <div className="flex-1 min-h-0">
         {selecionado ? (
           selecionado.temPdf ? (
             <PdfReader key={selecionado.id} ebookId={selecionado.id} />
@@ -107,6 +124,7 @@ export function Leitor({ ebooks }: { ebooks: EbookBiblioteca[] }) {
             </div>
           </div>
         )}
+        </div>
       </section>
     </div>
   )
