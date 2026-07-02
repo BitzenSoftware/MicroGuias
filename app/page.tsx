@@ -30,17 +30,47 @@ export default async function HomePage() {
   return (
     <div className="space-y-10">
       {/* Hero */}
-      <div className="text-center py-14">
-        <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight">
-          Conhecimento que transforma
-        </h1>
-        <p className="mt-4 text-lg text-gray-500 max-w-xl mx-auto">
-          Ebooks práticos e acessíveis para evoluir em qualquer área da sua vida.
-        </p>
-        <div className="mt-5 inline-flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-4 py-2 rounded-full text-sm font-medium">
-          🎁 Compre 2 ou mais ebooks e ganhe <strong>10% de desconto</strong>
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 px-6 py-16 sm:py-20 text-center text-white">
+        {/* Blobs decorativos */}
+        <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-28 -right-20 h-80 w-80 rounded-full bg-fuchsia-300/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:22px_22px]" />
+
+        <div className="relative mx-auto max-w-2xl">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium backdrop-blur-sm ring-1 ring-white/20">
+            ✨ Guias práticos · entrega imediata
+          </span>
+
+          <h1 className="mt-6 text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.05]">
+            Conhecimento que{' '}
+            <span className="bg-gradient-to-r from-amber-200 via-yellow-100 to-white bg-clip-text text-transparent">
+              transforma
+            </span>
+          </h1>
+
+          <p className="mx-auto mt-4 max-w-xl text-lg text-indigo-100">
+            Ebooks práticos e acessíveis para evoluir em qualquer área da sua vida.
+          </p>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="#catalogo"
+              className="rounded-xl bg-white px-6 py-3 font-semibold text-indigo-700 shadow-lg shadow-indigo-900/20 hover:bg-indigo-50 transition-colors"
+            >
+              Explorar catálogo →
+            </a>
+            <span className="inline-flex items-center gap-2 rounded-xl border border-green-300/40 bg-green-400/15 px-4 py-3 text-sm font-semibold text-white">
+              🎁 2+ ebooks = <span className="text-amber-200">10% OFF</span>
+            </span>
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-indigo-100/90">
+            <span className="inline-flex items-center gap-1.5">✅ Entrega imediata</span>
+            <span className="inline-flex items-center gap-1.5">🔒 Pagamento via PIX</span>
+            <span className="inline-flex items-center gap-1.5">📖 Leitura online</span>
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Combos / Promoções */}
       {promocoes.length > 0 && (
@@ -58,7 +88,9 @@ export default async function HomePage() {
       )}
 
       {/* Filtro de categorias */}
-      <CategoryFilter categorias={categoriasVisiveis} />
+      <div id="catalogo" className="scroll-mt-24">
+        <CategoryFilter categorias={categoriasVisiveis} />
+      </div>
 
       {/* Grade de ebooks */}
       {ebooks && ebooks.length > 0 ? (

@@ -55,13 +55,18 @@ export async function Header() {
                 href="/suporte"
                 aria-label="Suporte"
                 title="Fale conosco"
-                className="relative text-gray-500 hover:text-indigo-600 transition-colors"
+                className="relative"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
-                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                </svg>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-green-500 hover:bg-green-600 transition-colors shadow-sm">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5">
+                    <path fill="white" d="M20 2H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h3v3l4-3h9a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z" />
+                    <circle cx="9.5" cy="9.5" r="1.1" fill="#22c55e" />
+                    <circle cx="14.5" cy="9.5" r="1.1" fill="#22c55e" />
+                    <path d="M9 12.4a3 3 0 0 0 6 0" fill="none" stroke="#22c55e" strokeWidth="1.4" strokeLinecap="round" />
+                  </svg>
+                </span>
                 {naoLidas > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 text-[10px] font-bold text-white bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 text-[10px] font-bold text-white bg-red-500 rounded-full flex items-center justify-center ring-2 ring-white">
                     {naoLidas}
                   </span>
                 )}
