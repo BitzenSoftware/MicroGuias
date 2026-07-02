@@ -28,12 +28,6 @@ export default async function HomePage() {
   const idsComEbook = new Set((ebooks ?? []).map((e) => e.categoria_id))
   const categoriasVisiveis = (categorias ?? []).filter((c) => idsComEbook.has(c.id))
 
-  // Capas para ilustrar o hero
-  const heroCovers = (ebooks ?? [])
-    .map((e) => e.capa_url as string | null)
-    .filter((c): c is string => !!c)
-    .slice(0, 3)
-
   return (
     <div className="space-y-10">
       {/* Hero */}
@@ -80,24 +74,17 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Capas ilustrativas */}
-          {heroCovers.length > 0 && (
-            <div className="hidden md:flex items-center justify-center lg:justify-end">
-              {heroCovers.map((c, i) => (
-                <div
-                  key={i}
-                  className={[
-                    'relative h-56 w-40 flex-shrink-0 rounded-xl overflow-hidden bg-white shadow-2xl ring-1 ring-black/10 transition-transform',
-                    i === 0 ? 'rotate-[-6deg] z-10' : '',
-                    i === 1 ? '-ml-8 z-20 scale-105' : '',
-                    i === 2 ? '-ml-8 rotate-[6deg] z-10' : '',
-                  ].join(' ')}
-                >
-                  <Image src={c} alt="" fill className="object-contain p-1" sizes="160px" />
-                </div>
-              ))}
-            </div>
-          )}
+          {/* Imagem ilustrativa da coleção */}
+          <div className="flex items-center justify-center md:justify-end">
+            <Image
+              src="/hero-ebooks.png"
+              alt="Coleção de ebooks Micro Guias"
+              width={760}
+              height={430}
+              priority
+              className="w-full h-auto max-w-xl"
+            />
+          </div>
         </div>
       </section>
 
