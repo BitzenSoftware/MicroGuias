@@ -123,18 +123,18 @@ export default async function EbookPage({
 
             {bonus && bonus.length > 0 && (
               <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
-                <p className="text-sm font-semibold text-amber-800 mb-2">🎁 Inclui {bonus.length} bônus para baixar:</p>
-                <div className="flex flex-wrap gap-3">
+                <p className="text-sm font-semibold text-amber-800 mb-3">🎁 Inclui {bonus.length} bônus para baixar:</p>
+                <div className="grid grid-cols-2 gap-4">
                   {bonus.map((b) => (
-                    <div key={b.id} className="w-20 text-center">
+                    <div key={b.id} className="text-center">
                       <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-white border border-amber-200 shadow-sm">
                         {b.capa_url ? (
-                          <Image src={b.capa_url} alt={b.nome} fill className="object-contain p-0.5" sizes="80px" />
+                          <Image src={b.capa_url} alt={b.nome} fill className="object-contain p-1" sizes="(max-width: 768px) 45vw, 180px" />
                         ) : (
-                          <div className="absolute inset-0 flex items-center justify-center text-2xl">📎</div>
+                          <div className="absolute inset-0 flex items-center justify-center text-3xl">📎</div>
                         )}
                       </div>
-                      <p className="mt-1 text-[11px] text-amber-800 leading-tight line-clamp-2">{b.nome}</p>
+                      <p className="mt-1.5 text-xs font-medium text-amber-800 leading-tight line-clamp-2">{b.nome}</p>
                     </div>
                   ))}
                 </div>
