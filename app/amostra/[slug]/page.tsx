@@ -33,12 +33,12 @@ export default async function AmostraPage({
 
   const { data: ebook } = await supabase
     .from('loja_ebooks')
-    .select('id, titulo, slug, preco_centavos, capa_url, pdf_url')
+    .select('id, titulo, slug, preco_centavos, capa_url, pdf_url, is_curso')
     .eq('slug', slug)
     .eq('publicado', true)
     .single()
 
-  if (!ebook || !ebook.pdf_url) return notFound()
+  if (!ebook || (!ebook.pdf_url && !ebook.is_curso)) return notFound()
 
   const item = {
     id: ebook.id,

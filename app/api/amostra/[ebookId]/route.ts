@@ -29,17 +29,34 @@ export async function GET(
   // Só ebooks publicados (não vaza rascunho)
   const { data: ebook } = await supabase
     .from('loja_ebooks')
-    .select('id, pdf_url, publicado')
+    .select('id, pdf_url, publicado, is_curso')
     .eq('id', ebookId)
     .eq('publicado', true)
     .single()
 
-  if (!ebook || !ebook.pdf_url) {
+  if (!ebook) {
+    return NextResponse.json({ error: 'Amostra indisponível' }, { status: 404 })
+  }
+
+  // Fonte da amostra: PDF do ebook ou, se for curso, o 1º módulo
+  let sourcePath = ebook.pdf_url as string | null
+  if (!sourcePath && ebook.is_curso) {
+    const { data: mod } = await supabase
+      .from('loja_ebook_modulos')
+      .select('arquivo_path')
+      .eq('ebook_id', ebookId)
+      .order('ordem', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    sourcePath = mod?.arquivo_path ?? null
+  }
+
+  if (!sourcePath) {
     return NextResponse.json({ error: 'Amostra indisponível' }, { status: 404 })
   }
 
   // Baixa o PDF completo no servidor (não é exposto ao cliente)
-  const { data: blob, error } = await supabase.storage.from('pdfs').download(ebook.pdf_url)
+  const { data: blob, error } = await supabase.storage.from('pdfs').download(sourcePath)
   if (error || !blob) {
     return NextResponse.json({ error: 'Falha ao abrir a amostra' }, { status: 500 })
   }
