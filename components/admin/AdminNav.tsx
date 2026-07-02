@@ -9,6 +9,7 @@ const links = [
   { href: '/admin/ebooks/novo', label: 'Novo ebook', icon: '✨' },
   { href: '/admin/categorias', label: 'Categorias', icon: '🏷️' },
   { href: '/admin/promocoes', label: 'Promoções', icon: '🔥' },
+  { href: '/admin/mensagens', label: 'Mensagens', icon: '💬' },
   { href: '/admin/pedidos', label: 'Pedidos', icon: '🧾' },
 ]
 

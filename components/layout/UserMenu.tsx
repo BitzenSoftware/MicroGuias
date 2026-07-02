@@ -85,6 +85,13 @@ export function UserMenu({ nome, email, avatarUrl, isAdmin }: Props) {
             >
               📚 Meus ebooks
             </Link>
+            <Link
+              href="/suporte"
+              onClick={() => setAberto(false)}
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              💬 Suporte
+            </Link>
             {isAdmin && (
               <Link
                 href="/admin"
