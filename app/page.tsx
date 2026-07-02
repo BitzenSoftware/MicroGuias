@@ -96,9 +96,11 @@ export default async function HomePage() {
             <h2 className="text-xl font-bold text-gray-900">🔥 Combos & Ofertas</h2>
             <span className="text-sm text-gray-400">leve mais, pague menos</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="flex gap-5 overflow-x-auto pb-2 snap-x snap-mandatory -mx-1 px-1">
             {promocoes.map((promo) => (
-              <ComboCard key={promo.id} promo={promo} />
+              <div key={promo.id} className="flex-shrink-0 w-80 max-w-[85vw] snap-start">
+                <ComboCard promo={promo} />
+              </div>
             ))}
           </div>
         </div>
