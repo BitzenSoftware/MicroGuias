@@ -18,6 +18,8 @@ export function PdfReader({
   moduloId?: string
 }) {
   const areaRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [fullscreen, setFullscreen] = useState(false)
   const [url, setUrl] = useState<string | null>(null)
   const [erro, setErro] = useState<string | null>(null)
   const [numPages, setNumPages] = useState(0)
@@ -79,6 +81,21 @@ export function PdfReader({
   const anterior = () => setPagina((p) => Math.max(p - 1, 1))
   const proxima = () => setPagina((p) => Math.min(p + 1, totalSlides))
 
+  // Tela cheia
+  useEffect(() => {
+    const onFs = () => setFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onFs)
+    return () => document.removeEventListener('fullscreenchange', onFs)
+  }, [])
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {})
+    } else {
+      rootRef.current?.requestFullscreen().catch(() => {})
+    }
+  }
+
   // Enquadra a página inteira: limita pela largura E pela altura disponíveis
   const pad = 32
   const larguraPagina = Math.max(
@@ -87,7 +104,25 @@ export function PdfReader({
   )
 
   return (
-    <div className="h-full flex flex-col" onContextMenu={(e) => e.preventDefault()}>
+    <div ref={rootRef} className="relative h-full flex flex-col bg-white" onContextMenu={(e) => e.preventDefault()}>
+      {/* Botão tela cheia */}
+      <button
+        type="button"
+        onClick={toggleFullscreen}
+        title={fullscreen ? 'Sair da tela cheia' : 'Abrir em tela cheia'}
+        className="absolute top-2 right-2 z-20 flex h-9 w-9 items-center justify-center rounded-lg bg-white/90 border border-gray-200 text-gray-600 shadow-sm hover:bg-white hover:text-indigo-600 transition-colors cursor-pointer"
+      >
+        {fullscreen ? (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3" />
+          </svg>
+        )}
+      </button>
+
       {amostra && (
         <div className="bg-amber-50 border-b border-amber-100 text-amber-800 text-xs font-medium text-center py-2 px-4">
           🔓 Você está lendo uma amostra grátis das primeiras páginas
