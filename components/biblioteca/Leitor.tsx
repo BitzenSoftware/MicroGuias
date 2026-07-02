@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
 
@@ -15,12 +15,40 @@ export type EbookBiblioteca = {
   titulo: string
   capa_url: string | null
   temPdf: boolean
+  isCurso: boolean
   bonus: { id: string; nome: string }[]
+  modulos: { id: string; titulo: string }[]
+}
+
+function PreparacaoAviso({ curso = false }: { curso?: boolean }) {
+  return (
+    <div className="h-full flex items-center justify-center text-center text-gray-500 p-8">
+      <div className="max-w-sm">
+        <p className="text-4xl mb-3">🛠️</p>
+        <p className="font-semibold text-gray-700">Conteúdo em preparação</p>
+        <p className="text-sm mt-1">
+          {curso
+            ? 'Os módulos deste curso ainda estão sendo publicados. Seu acesso já está garantido — em breve eles aparecerão aqui.'
+            : 'Este ebook ainda está sendo finalizado. Seu acesso já está garantido — assim que o conteúdo for publicado, ele aparecerá aqui para leitura.'}
+        </p>
+      </div>
+    </div>
+  )
 }
 
 export function Leitor({ ebooks }: { ebooks: EbookBiblioteca[] }) {
   const [busca, setBusca] = useState('')
   const [selecionado, setSelecionado] = useState<EbookBiblioteca | null>(ebooks[0] ?? null)
+  const [moduloSel, setModuloSel] = useState<string | null>(null)
+
+  // Ao trocar de ebook, seleciona o 1º módulo (se for curso)
+  useEffect(() => {
+    if (selecionado?.isCurso && selecionado.modulos.length > 0) {
+      setModuloSel(selecionado.modulos[0].id)
+    } else {
+      setModuloSel(null)
+    }
+  }, [selecionado])
 
   const filtrados = useMemo(() => {
     const q = busca.trim().toLowerCase()
@@ -100,21 +128,33 @@ export function Leitor({ ebooks }: { ebooks: EbookBiblioteca[] }) {
           </div>
         )}
 
+        {/* Seletor de módulos (cursos) */}
+        {selecionado?.isCurso && selecionado.modulos.length > 0 && (
+          <div className="border-b border-gray-100 bg-indigo-50/60 px-4 py-2.5 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-indigo-700">🎓 Módulos:</span>
+            {selecionado.modulos.map((m, i) => (
+              <button key={m.id} type="button" onClick={() => setModuloSel(m.id)}
+                className={`text-xs font-medium rounded-lg px-2.5 py-1 border transition-colors cursor-pointer ${
+                  moduloSel === m.id ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-100'
+                }`}>
+                {i + 1}. {m.titulo}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex-1 min-h-0">
         {selecionado ? (
-          selecionado.temPdf ? (
+          selecionado.isCurso ? (
+            moduloSel ? (
+              <PdfReader key={moduloSel} ebookId={selecionado.id} moduloId={moduloSel} />
+            ) : (
+              <PreparacaoAviso curso />
+            )
+          ) : selecionado.temPdf ? (
             <PdfReader key={selecionado.id} ebookId={selecionado.id} />
           ) : (
-            <div className="h-full flex items-center justify-center text-center text-gray-500 p-8">
-              <div className="max-w-sm">
-                <p className="text-4xl mb-3">🛠️</p>
-                <p className="font-semibold text-gray-700">Conteúdo em preparação</p>
-                <p className="text-sm mt-1">
-                  Este ebook ainda está sendo finalizado. Seu acesso já está garantido —
-                  assim que o conteúdo for publicado, ele aparecerá aqui para leitura.
-                </p>
-              </div>
-            </div>
+            <PreparacaoAviso />
           )
         ) : (
           <div className="h-full flex items-center justify-center text-center text-gray-400">

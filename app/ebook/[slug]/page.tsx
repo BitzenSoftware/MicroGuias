@@ -43,16 +43,15 @@ export default async function EbookPage({
     .select('*, loja_categorias(id, nome, slug, icone_emoji)')
     .eq('slug', slug)
     .eq('publicado', true)
-    .not('pdf_url', 'is', null)
+    .or('pdf_url.not.is.null,is_curso.eq.true')
     .single()
 
   if (!ebook) return notFound()
 
-  const { data: bonus } = await supabase
-    .from('loja_ebook_bonus')
-    .select('id, nome, capa_url')
-    .eq('ebook_id', ebook.id)
-    .order('criado_em')
+  const [{ data: bonus }, { data: modulos }] = await Promise.all([
+    supabase.from('loja_ebook_bonus').select('id, nome, capa_url').eq('ebook_id', ebook.id).order('criado_em'),
+    supabase.from('loja_ebook_modulos').select('id, titulo').eq('ebook_id', ebook.id).order('ordem'),
+  ])
 
   const categoria = ebook.loja_categorias as {
     id: string; nome: string; slug: string; icone_emoji: string
@@ -120,6 +119,15 @@ export default async function EbookPage({
             <p className="text-sm text-green-600 font-medium">
               💡 Leve 2+ ebooks e ganhe 10% de desconto no total
             </p>
+
+            {ebook.is_curso && modulos && modulos.length > 0 && (
+              <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3">
+                <p className="text-sm font-semibold text-indigo-800 mb-1">🎓 Curso com {modulos.length} módulos:</p>
+                <ol className="text-sm text-indigo-700 list-decimal list-inside space-y-0.5">
+                  {modulos.map((m) => <li key={m.id}>{m.titulo}</li>)}
+                </ol>
+              </div>
+            )}
 
             {bonus && bonus.length > 0 && (
               <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">

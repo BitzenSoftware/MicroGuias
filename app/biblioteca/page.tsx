@@ -22,49 +22,57 @@ export default async function BibliotecaPage() {
   let ebooks: EbookBiblioteca[] = []
 
   if (isAdmin) {
-    // Admin lê todos os ebooks que têm PDF
+    // Admin lê todos os ebooks com PDF ou cursos
     const { data } = await supabase
       .from('loja_ebooks')
-      .select('id, titulo, capa_url, pdf_url')
-      .not('pdf_url', 'is', null)
+      .select('id, titulo, capa_url, pdf_url, is_curso')
+      .or('pdf_url.not.is.null,is_curso.eq.true')
       .order('titulo')
-    ebooks = (data ?? []).map((e) => ({ id: e.id, titulo: e.titulo, capa_url: e.capa_url, temPdf: true, bonus: [] }))
+    ebooks = (data ?? []).map((e) => ({ id: e.id, titulo: e.titulo, capa_url: e.capa_url, temPdf: !!e.pdf_url, isCurso: !!e.is_curso, bonus: [], modulos: [] }))
   } else {
-    // Cliente vê TUDO que comprou (pedido pago) — mesmo sem PDF ainda,
-    // pra nunca "sumir" um item pago. Sem PDF aparece como "em preparação".
+    // Cliente vê TUDO que comprou (pedido pago) — mesmo sem conteúdo ainda,
+    // pra nunca "sumir" um item pago. Sem conteúdo aparece como "em preparação".
     const { data } = await supabase
       .from('loja_pedido_itens')
-      .select('loja_ebooks!inner(id, titulo, capa_url, pdf_url), loja_pedidos!inner(user_id, status)')
+      .select('loja_ebooks!inner(id, titulo, capa_url, pdf_url, is_curso), loja_pedidos!inner(user_id, status)')
       .eq('loja_pedidos.user_id', user.id)
       .eq('loja_pedidos.status', 'pago')
 
     const vistos = new Set<string>()
     for (const row of data ?? []) {
-      const e = row.loja_ebooks as unknown as { id: string; titulo: string; capa_url: string | null; pdf_url: string | null }
+      const e = row.loja_ebooks as unknown as { id: string; titulo: string; capa_url: string | null; pdf_url: string | null; is_curso: boolean | null }
       if (!e || vistos.has(e.id)) continue
       vistos.add(e.id)
-      ebooks.push({ id: e.id, titulo: e.titulo, capa_url: e.capa_url, temPdf: !!e.pdf_url, bonus: [] })
+      ebooks.push({ id: e.id, titulo: e.titulo, capa_url: e.capa_url, temPdf: !!e.pdf_url, isCurso: !!e.is_curso, bonus: [], modulos: [] })
     }
     ebooks.sort((a, b) => a.titulo.localeCompare(b.titulo))
   }
 
-  // Anexa os bônus (baixáveis) de cada ebook
+  // Anexa bônus (baixáveis) e módulos (de cursos) de cada ebook
   if (ebooks.length > 0) {
-    const { data: bonusData } = await supabase
-      .from('loja_ebook_bonus')
-      .select('id, nome, ebook_id')
-      .in('ebook_id', ebooks.map((e) => e.id))
-      .order('criado_em')
+    const ids = ebooks.map((e) => e.id)
+    const [{ data: bonusData }, { data: modData }] = await Promise.all([
+      supabase.from('loja_ebook_bonus').select('id, nome, ebook_id').in('ebook_id', ids).order('criado_em'),
+      supabase.from('loja_ebook_modulos').select('id, titulo, ebook_id, ordem').in('ebook_id', ids).order('ordem'),
+    ])
 
-    if (bonusData && bonusData.length > 0) {
-      const porEbook = new Map<string, { id: string; nome: string }[]>()
-      for (const b of bonusData) {
-        const lista = porEbook.get(b.ebook_id) ?? []
-        lista.push({ id: b.id, nome: b.nome })
-        porEbook.set(b.ebook_id, lista)
-      }
-      ebooks = ebooks.map((e) => ({ ...e, bonus: porEbook.get(e.id) ?? [] }))
+    const bonusPorEbook = new Map<string, { id: string; nome: string }[]>()
+    for (const b of bonusData ?? []) {
+      const l = bonusPorEbook.get(b.ebook_id) ?? []
+      l.push({ id: b.id, nome: b.nome })
+      bonusPorEbook.set(b.ebook_id, l)
     }
+    const modPorEbook = new Map<string, { id: string; titulo: string }[]>()
+    for (const m of modData ?? []) {
+      const l = modPorEbook.get(m.ebook_id) ?? []
+      l.push({ id: m.id, titulo: m.titulo })
+      modPorEbook.set(m.ebook_id, l)
+    }
+    ebooks = ebooks.map((e) => ({
+      ...e,
+      bonus: bonusPorEbook.get(e.id) ?? [],
+      modulos: modPorEbook.get(e.id) ?? [],
+    }))
   }
 
   return (

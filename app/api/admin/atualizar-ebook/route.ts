@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     capa_url?: string | null
     pdf_path?: string | null
     publicado?: boolean
+    is_curso?: boolean
   }
   try {
     b = await request.json()
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
     descricao_longa: b.descricao_longa || null,
   }
   if (typeof b.publicado === 'boolean') update.publicado = b.publicado
+  if (typeof b.is_curso === 'boolean') update.is_curso = b.is_curso
   // Só atualiza arquivos se vieram novos caminhos
   if (b.capa_url) update.capa_url = b.capa_url
   if (b.pdf_path) update.pdf_url = b.pdf_path

@@ -20,7 +20,7 @@ export default async function HomePage() {
       .from('loja_ebooks')
       .select('*, loja_categorias(id, nome, slug, icone_emoji, ordem)')
       .eq('publicado', true)
-      .not('pdf_url', 'is', null)
+      .or('pdf_url.not.is.null,is_curso.eq.true')
       .order('criado_em', { ascending: false }),
   ])
 

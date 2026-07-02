@@ -20,7 +20,8 @@ export async function POST(request: Request) {
     descricao_curta?: string
     descricao_longa?: string
     capa_url?: string | null
-    pdf_path?: string
+    pdf_path?: string | null
+    is_curso?: boolean
   }
   try {
     b = await request.json()
@@ -31,7 +32,8 @@ export async function POST(request: Request) {
   if (!b.titulo || !b.slug || !b.categoria_id || !b.preco_centavos) {
     return NextResponse.json({ error: 'Preencha título, categoria e preço.' }, { status: 400 })
   }
-  if (!b.pdf_path) {
+  // Curso não precisa de PDF principal (o conteúdo vem nos módulos)
+  if (!b.is_curso && !b.pdf_path) {
     return NextResponse.json({ error: 'Anexe o arquivo PDF do ebook.' }, { status: 400 })
   }
 
@@ -47,7 +49,8 @@ export async function POST(request: Request) {
       categoria_id: b.categoria_id,
       preco_centavos: b.preco_centavos,
       capa_url: b.capa_url || null,
-      pdf_url: b.pdf_path,
+      pdf_url: b.pdf_path || null,
+      is_curso: !!b.is_curso,
       publicado: true,
     })
     .select('id, slug')

@@ -10,10 +10,12 @@ export function PdfReader({
   ebookId,
   amostra = false,
   paywall,
+  moduloId,
 }: {
   ebookId: string
   amostra?: boolean
   paywall?: React.ReactNode
+  moduloId?: string
 }) {
   const areaRef = useRef<HTMLDivElement>(null)
   const [url, setUrl] = useState<string | null>(null)
@@ -39,9 +41,11 @@ export function PdfReader({
       return
     }
 
+    // Módulo de curso ou ebook completo — valida a posse e devolve URL assinada
+    const endpoint = moduloId ? `/api/ler-modulo/${moduloId}` : `/api/ler/${ebookId}`
     let ativo = true
     setUrl(null)
-    fetch(`/api/ler/${ebookId}`)
+    fetch(endpoint)
       .then(async (r) => {
         const data = await r.json()
         if (!r.ok) throw new Error(data.error || 'Falha ao abrir')
@@ -49,7 +53,7 @@ export function PdfReader({
       })
       .catch((e) => ativo && setErro(e.message))
     return () => { ativo = false }
-  }, [ebookId, amostra])
+  }, [ebookId, amostra, moduloId])
 
   // Mede a área disponível (largura e altura)
   useEffect(() => {

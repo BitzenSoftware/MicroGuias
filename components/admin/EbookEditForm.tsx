@@ -24,6 +24,7 @@ export function EbookEditForm({
   const [pdf, setPdf] = useState<File | null>(null)
   const [previewCapa, setPreviewCapa] = useState<string | null>(null)
   const [publicado, setPublicado] = useState(ebook.publicado)
+  const [isCurso, setIsCurso] = useState(!!ebook.is_curso)
 
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -84,6 +85,7 @@ export function EbookEditForm({
           capa_url: capaUrl,
           pdf_path: pdfPath,
           publicado,
+          is_curso: isCurso,
         }),
       })
       const data = await res.json()
@@ -141,6 +143,21 @@ export function EbookEditForm({
             title={publicado ? 'Desativar (ocultar da loja)' : 'Ativar (mostrar na loja)'}
           >
             <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${publicado ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+        </div>
+
+        {/* Curso: conteúdo por módulos */}
+        <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50/60 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-gray-800">📚 É um curso (conteúdo por módulos)</p>
+            <p className="text-xs text-gray-400">
+              {isCurso ? 'Gerencie os módulos (1 PDF cada) na seção abaixo.' : 'Ebook comum: um único PDF de leitura.'}
+            </p>
+          </div>
+          <button type="button" role="switch" aria-checked={isCurso ? 'true' : 'false'}
+            onClick={() => setIsCurso((v) => !v)}
+            className={`relative inline-flex h-7 w-12 flex-shrink-0 items-center rounded-full transition-colors cursor-pointer ${isCurso ? 'bg-indigo-600' : 'bg-gray-300'}`}>
+            <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${isCurso ? 'translate-x-6' : 'translate-x-1'}`} />
           </button>
         </div>
 

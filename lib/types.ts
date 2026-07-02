@@ -17,10 +17,20 @@ export type Ebook = {
   capa_url: string | null
   pdf_url: string | null
   publicado: boolean
+  is_curso?: boolean
   criado_em: string
   categoria_id: string | null
   conteudo?: EbookConteudo | null
   loja_categorias: Categoria | null
+}
+
+export type EbookModulo = {
+  id: string
+  ebook_id: string
+  titulo: string
+  ordem: number
+  arquivo_path: string
+  criado_em: string
 }
 
 export type EbookBonus = {

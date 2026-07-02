@@ -48,13 +48,13 @@ export async function POST(request: Request) {
 
     const { data: itens } = await supabase
       .from('loja_promocao_itens')
-      .select('loja_ebooks!inner(id, titulo, preco_centavos, publicado, pdf_url)')
+      .select('loja_ebooks!inner(id, titulo, preco_centavos, publicado, pdf_url, is_curso)')
       .eq('promocao_id', promo.id)
 
     const todos = (itens ?? []).map((r) => r.loja_ebooks as unknown as {
-      id: string; titulo: string; preco_centavos: number; publicado: boolean; pdf_url: string | null
+      id: string; titulo: string; preco_centavos: number; publicado: boolean; pdf_url: string | null; is_curso: boolean | null
     })
-    ebooks = todos.filter((e) => e.publicado && e.pdf_url).map((e) => ({ id: e.id, titulo: e.titulo, preco_centavos: e.preco_centavos }))
+    ebooks = todos.filter((e) => e.publicado && (e.pdf_url || e.is_curso)).map((e) => ({ id: e.id, titulo: e.titulo, preco_centavos: e.preco_centavos }))
 
     if (ebooks.length === 0 || ebooks.length !== todos.length) {
       return NextResponse.json(
@@ -76,13 +76,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Carrinho vazio' }, { status: 400 })
     }
 
-    // Só vende o que está publicado E tem PDF entregável.
+    // Só vende o que está publicado E tem conteúdo (PDF ou curso com módulos).
     const { data: lista, error: ebErr } = await supabase
       .from('loja_ebooks')
-      .select('id, titulo, preco_centavos, publicado, pdf_url')
+      .select('id, titulo, preco_centavos, publicado, pdf_url, is_curso')
       .in('id', ids)
       .eq('publicado', true)
-      .not('pdf_url', 'is', null)
+      .or('pdf_url.not.is.null,is_curso.eq.true')
 
     if (ebErr || !lista || lista.length === 0) {
       return NextResponse.json({ error: 'Ebooks indisponíveis' }, { status: 400 })
@@ -92,6 +92,22 @@ export async function POST(request: Request) {
         { error: 'Um dos ebooks ficou indisponível. Atualize o carrinho e tente novamente.' },
         { status: 409 }
       )
+    }
+
+    // Curso precisa ter ao menos 1 módulo
+    const cursoIds = lista.filter((e) => e.is_curso).map((e) => e.id)
+    if (cursoIds.length > 0) {
+      const { data: mods } = await supabase
+        .from('loja_ebook_modulos')
+        .select('ebook_id')
+        .in('ebook_id', cursoIds)
+      const comModulo = new Set((mods ?? []).map((m) => m.ebook_id))
+      if (cursoIds.some((id) => !comModulo.has(id))) {
+        return NextResponse.json(
+          { error: 'Um dos cursos está sem módulos publicados. Tente novamente mais tarde.' },
+          { status: 409 }
+        )
+      }
     }
 
     ebooks = lista.map((e) => ({ id: e.id, titulo: e.titulo, preco_centavos: e.preco_centavos }))
