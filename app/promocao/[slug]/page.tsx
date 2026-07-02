@@ -37,9 +37,9 @@ export default async function PromocaoPage({
             🔥 Combo especial
           </span>
 
-          <div className="flex flex-wrap gap-2">
-            {promo.ebooks.slice(0, 6).map((e) => (
-              <div key={e.id} className="relative h-32 w-24 rounded-lg overflow-hidden bg-white border border-gray-100 shadow-sm">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            {promo.ebooks.map((e) => (
+              <div key={e.id} className="relative aspect-[3/4] rounded-lg overflow-hidden bg-white border border-gray-100 shadow-sm">
                 {e.capa_url ? (
                   <Image src={e.capa_url} alt={e.titulo} fill className="object-contain p-0.5" sizes="96px" />
                 ) : (
