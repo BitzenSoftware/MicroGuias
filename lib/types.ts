@@ -28,6 +28,7 @@ export type EbookBonus = {
   ebook_id: string
   nome: string
   arquivo_path: string
+  capa_url: string | null
   criado_em: string
 }
 

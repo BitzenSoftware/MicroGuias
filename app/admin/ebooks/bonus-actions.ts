@@ -16,7 +16,12 @@ export async function listarBonus(ebookId: string): Promise<EbookBonus[]> {
   return (data ?? []) as EbookBonus[]
 }
 
-export async function adicionarBonus(ebookId: string, nome: string, arquivoPath: string) {
+export async function adicionarBonus(
+  ebookId: string,
+  nome: string,
+  arquivoPath: string,
+  capaUrl?: string | null
+) {
   const admin = await getAdmin()
   if (!admin) throw new Error('Não autorizado')
   if (!nome.trim() || !arquivoPath) throw new Error('Dados do bônus incompletos.')
@@ -26,6 +31,7 @@ export async function adicionarBonus(ebookId: string, nome: string, arquivoPath:
     ebook_id: ebookId,
     nome: nome.trim(),
     arquivo_path: arquivoPath,
+    capa_url: capaUrl || null,
   })
   if (error) throw new Error(error.message)
 }

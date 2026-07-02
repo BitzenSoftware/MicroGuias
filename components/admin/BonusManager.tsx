@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { adicionarBonus, removerBonus } from '@/app/admin/ebooks/bonus-actions'
 import type { EbookBonus } from '@/lib/types'
@@ -14,6 +15,7 @@ export function BonusManager({
 }) {
   const [bonus, setBonus] = useState<EbookBonus[]>(bonusIniciais)
   const [arquivo, setArquivo] = useState<File | null>(null)
+  const [capa, setCapa] = useState<File | null>(null)
   const [nome, setNome] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -31,29 +33,40 @@ export function BonusManager({
 
     setEnviando(true)
     try {
-      // 1) URL assinada
+      // 1) URL(s) assinada(s)
+      const capaExt = capa ? capa.name.split('.').pop() || 'jpg' : undefined
       const r = await fetch('/api/admin/bonus-upload-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ebookId, nomeArquivo: arquivo.name }),
+        body: JSON.stringify({ ebookId, nomeArquivo: arquivo.name, temCapa: !!capa, capaExt }),
       })
       const u = await r.json()
       if (!r.ok) throw new Error(u.error || 'Falha ao preparar upload')
 
-      // 2) Upload direto ao Storage
       const supabase = createClient()
+
+      // 2) Upload do arquivo do bônus
       const up = await supabase.storage.from('pdfs').uploadToSignedUrl(u.path, u.token, arquivo)
-      if (up.error) throw new Error('Falha ao enviar: ' + up.error.message)
+      if (up.error) throw new Error('Falha ao enviar o arquivo: ' + up.error.message)
 
-      // 3) Registra no banco
-      await adicionarBonus(ebookId, nome, u.path)
+      // 3) Upload da capa (opcional)
+      let capaUrl: string | null = null
+      if (capa && u.capa) {
+        const upc = await supabase.storage.from('capas').uploadToSignedUrl(u.capa.path, u.capa.token, capa)
+        if (upc.error) throw new Error('Falha ao enviar a capa: ' + upc.error.message)
+        capaUrl = u.capaUrl
+      }
 
-      // 4) Atualiza a lista localmente
+      // 4) Registra no banco
+      await adicionarBonus(ebookId, nome, u.path, capaUrl)
+
+      // 5) Atualiza a lista localmente
       setBonus((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), ebook_id: ebookId, nome: nome.trim(), arquivo_path: u.path, criado_em: new Date().toISOString() },
+        { id: crypto.randomUUID(), ebook_id: ebookId, nome: nome.trim(), arquivo_path: u.path, capa_url: capaUrl, criado_em: new Date().toISOString() },
       ])
       setArquivo(null)
+      setCapa(null)
       setNome('')
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao anexar bônus')
@@ -88,7 +101,13 @@ export function BonusManager({
         <ul className="space-y-2">
           {bonus.map((b) => (
             <li key={b.id} className="flex items-center gap-3 border border-gray-100 rounded-lg px-3 py-2">
-              <span className="text-lg">📎</span>
+              <div className="relative h-12 w-9 flex-shrink-0 rounded overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
+                {b.capa_url ? (
+                  <Image src={b.capa_url} alt={b.nome} fill className="object-contain p-0.5" sizes="36px" />
+                ) : (
+                  <span className="text-lg">📎</span>
+                )}
+              </div>
               <span className="flex-1 min-w-0 text-sm text-gray-800 truncate">{b.nome}</span>
               <button type="button" onClick={() => remover(b.id)} disabled={removendo === b.id}
                 className="text-xs font-medium text-red-600 hover:bg-red-50 px-2 py-1 rounded cursor-pointer disabled:opacity-50">
@@ -114,6 +133,12 @@ export function BonusManager({
             <input value={nome} onChange={(e) => setNome(e.target.value)}
               placeholder="Ex.: Prompt Book do Contador Pro"
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Capa do bônus (opcional)</label>
+            <input type="file" title="Capa do bônus" accept="image/*" onChange={(e) => setCapa(e.target.files?.[0] ?? null)}
+              className="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 file:text-sm file:font-medium hover:file:bg-indigo-100" />
+            {capa && <p className="text-xs text-green-600 mt-1">{capa.name}</p>}
           </div>
         </div>
 

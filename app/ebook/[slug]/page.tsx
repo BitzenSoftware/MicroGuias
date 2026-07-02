@@ -50,7 +50,7 @@ export default async function EbookPage({
 
   const { data: bonus } = await supabase
     .from('loja_ebook_bonus')
-    .select('id, nome')
+    .select('id, nome, capa_url')
     .eq('ebook_id', ebook.id)
     .order('criado_em')
 
@@ -123,10 +123,21 @@ export default async function EbookPage({
 
             {bonus && bonus.length > 0 && (
               <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
-                <p className="text-sm font-semibold text-amber-800">🎁 Inclui {bonus.length} bônus para baixar:</p>
-                <ul className="mt-1 text-sm text-amber-700 list-disc list-inside">
-                  {bonus.map((b) => <li key={b.id}>{b.nome}</li>)}
-                </ul>
+                <p className="text-sm font-semibold text-amber-800 mb-2">🎁 Inclui {bonus.length} bônus para baixar:</p>
+                <div className="flex flex-wrap gap-3">
+                  {bonus.map((b) => (
+                    <div key={b.id} className="w-20 text-center">
+                      <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-white border border-amber-200 shadow-sm">
+                        {b.capa_url ? (
+                          <Image src={b.capa_url} alt={b.nome} fill className="object-contain p-0.5" sizes="80px" />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center text-2xl">📎</div>
+                        )}
+                      </div>
+                      <p className="mt-1 text-[11px] text-amber-800 leading-tight line-clamp-2">{b.nome}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
