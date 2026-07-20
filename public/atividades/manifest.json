@@ -1,0 +1,236 @@
+[
+  {
+    "slug": "primeiros-riscos",
+    "title": "Primeiros Riscos",
+    "subtitle": "Segure o lápis e siga os caminhos",
+    "idade": "2–3 anos",
+    "foco": "Primeiros traços",
+    "emoji": "✏️",
+    "cor": "from-teal-400 to-emerald-500"
+  },
+  {
+    "slug": "formas-grandes",
+    "title": "Formas Grandes",
+    "subtitle": "Cubra o contorno das formas gigantes",
+    "idade": "2–3 anos",
+    "foco": "Formas & traçado",
+    "emoji": "⭐",
+    "cor": "from-amber-400 to-orange-500"
+  },
+  {
+    "slug": "linhas-de-recorte",
+    "title": "Linhas de Recorte",
+    "subtitle": "Treine a tesoura seguindo as linhas",
+    "idade": "2–3 anos",
+    "foco": "Coordenação & tesoura",
+    "emoji": "✂️",
+    "cor": "from-rose-400 to-red-500"
+  },
+  {
+    "slug": "tudo-sobre-mim",
+    "title": "Tudo Sobre Mim",
+    "subtitle": "Meu caderno de atividades",
+    "idade": "4–5 anos",
+    "foco": "Identidade & escrita",
+    "emoji": "🙂",
+    "cor": "from-indigo-500 to-indigo-600"
+  },
+  {
+    "slug": "vamos-tracar",
+    "title": "Vamos Traçar!",
+    "subtitle": "Siga os caminhos pontilhados",
+    "idade": "4–5 anos",
+    "foco": "Coordenação motora",
+    "emoji": "〰️",
+    "cor": "from-sky-500 to-blue-600"
+  },
+  {
+    "slug": "tracando-vogais",
+    "title": "Traçando as Vogais",
+    "subtitle": "Cubra as vogais e aprenda os sons",
+    "idade": "4–5 anos",
+    "foco": "Vogais & traçado",
+    "emoji": "🅰️",
+    "cor": "from-violet-500 to-purple-600"
+  },
+  {
+    "slug": "contando-ate-5",
+    "title": "Contando até 5",
+    "subtitle": "Conte as figuras e escreva o número",
+    "idade": "4–5 anos",
+    "foco": "Números & contagem",
+    "emoji": "🔢",
+    "cor": "from-emerald-500 to-teal-600"
+  },
+  {
+    "slug": "continue-o-padrao",
+    "title": "Continue o Padrão",
+    "subtitle": "Descubra qual forma vem depois",
+    "idade": "4–5 anos",
+    "foco": "Lógica & atenção",
+    "emoji": "🔷",
+    "cor": "from-sky-500 to-cyan-600"
+  },
+  {
+    "slug": "ligue-os-pontos-estrela",
+    "title": "Ligue os Pontos",
+    "subtitle": "De 1 a 5 aparece uma estrela!",
+    "idade": "4–5 anos",
+    "foco": "Números & traçado",
+    "emoji": "⭐",
+    "cor": "from-amber-400 to-yellow-500"
+  },
+  {
+    "slug": "minhas-emocoes",
+    "title": "Minhas Emoções",
+    "subtitle": "Conhecer o que a gente sente",
+    "idade": "4–5 anos",
+    "foco": "Socioemocional",
+    "emoji": "💛",
+    "cor": "from-amber-400 to-orange-500"
+  },
+  {
+    "slug": "minha-rotina",
+    "title": "Minha Rotina do Dia",
+    "subtitle": "Marque cada passo do seu dia",
+    "idade": "4–5 anos",
+    "foco": "Autonomia",
+    "emoji": "⏰",
+    "cor": "from-violet-500 to-purple-600"
+  },
+  {
+    "slug": "tracando-numeros",
+    "title": "Traçando os Números",
+    "subtitle": "Cubra e escreva • 1 a 10",
+    "idade": "6–7 anos",
+    "foco": "Números & traçado",
+    "emoji": "✏️",
+    "cor": "from-rose-500 to-red-500"
+  },
+  {
+    "slug": "tracando-alfabeto",
+    "title": "Traçando o Alfabeto",
+    "subtitle": "Cubra cada letra • A a Z",
+    "idade": "6–7 anos",
+    "foco": "Letras & traçado",
+    "emoji": "🔤",
+    "cor": "from-emerald-500 to-teal-600"
+  },
+  {
+    "slug": "tracando-palavras",
+    "title": "Traçando Palavras",
+    "subtitle": "Cubra as palavrinhas e leia em voz alta",
+    "idade": "6–7 anos",
+    "foco": "Leitura & escrita",
+    "emoji": "📝",
+    "cor": "from-indigo-500 to-blue-600"
+  },
+  {
+    "slug": "ligue-numero-quantidade",
+    "title": "Ligue Número e Quantidade",
+    "subtitle": "Cada número tem a sua quantidade",
+    "idade": "6–7 anos",
+    "foco": "Numeracia & lógica",
+    "emoji": "🔗",
+    "cor": "from-sky-500 to-cyan-600"
+  },
+  {
+    "slug": "ligue-os-pontos-casinha",
+    "title": "Ligue os Pontos: Casinha",
+    "subtitle": "De 1 a 5 aparece uma casinha",
+    "idade": "6–7 anos",
+    "foco": "Números & traçado",
+    "emoji": "🏠",
+    "cor": "from-amber-400 to-orange-500"
+  },
+  {
+    "slug": "labirinto-do-bichinho",
+    "title": "Labirinto do Bichinho",
+    "subtitle": "Ajude a chegar do início ao fim",
+    "idade": "6–7 anos",
+    "foco": "Traçado & foco",
+    "emoji": "🐭",
+    "cor": "from-teal-400 to-emerald-500"
+  },
+  {
+    "slug": "primeiras-continhas",
+    "title": "Primeiras Continhas",
+    "subtitle": "Somar é fácil e divertido • até 10",
+    "idade": "6–7 anos",
+    "foco": "Somar & raciocínio",
+    "emoji": "➕",
+    "cor": "from-rose-500 to-pink-600"
+  },
+  {
+    "slug": "meu-nome-minhas-letras",
+    "title": "Meu Nome e Minhas Letras",
+    "subtitle": "Treine a escrita do seu nome",
+    "idade": "6–7 anos",
+    "foco": "Escrita & identidade",
+    "emoji": "🖊️",
+    "cor": "from-violet-500 to-purple-600"
+  },
+  {
+    "slug": "ligue-os-pontos-peixe",
+    "title": "Ligue os Pontos: Peixinho",
+    "subtitle": "De 1 a 7 nasce um peixe",
+    "idade": "6–7 anos",
+    "foco": "Números & traçado",
+    "emoji": "🐠",
+    "cor": "from-sky-500 to-blue-600"
+  },
+  {
+    "slug": "ligue-os-opostos",
+    "title": "Ligue os Opostos",
+    "subtitle": "Cada palavra tem o seu contrário",
+    "idade": "6–7 anos",
+    "foco": "Vocabulário & lógica",
+    "emoji": "↔️",
+    "cor": "from-fuchsia-500 to-pink-600"
+  },
+  {
+    "slug": "labirinto-desafio",
+    "title": "Labirinto Desafio",
+    "subtitle": "Um labirinto maior para mentes espertas",
+    "idade": "8+ anos",
+    "foco": "Foco & planejamento",
+    "emoji": "🧩",
+    "cor": "from-indigo-600 to-violet-700"
+  },
+  {
+    "slug": "continhas-de-subtracao",
+    "title": "Continhas de Subtração",
+    "subtitle": "Tire e descubra quanto sobra",
+    "idade": "8+ anos",
+    "foco": "Subtrair & raciocínio",
+    "emoji": "➖",
+    "cor": "from-rose-500 to-red-600"
+  },
+  {
+    "slug": "tabuada-do-2-e-5",
+    "title": "Tabuada do 2 e do 5",
+    "subtitle": "Multiplicar brincando",
+    "idade": "8+ anos",
+    "foco": "Multiplicação",
+    "emoji": "✖️",
+    "cor": "from-emerald-500 to-green-600"
+  },
+  {
+    "slug": "contas-de-somar-ate-20",
+    "title": "Somar até 20",
+    "subtitle": "Um desafio de somas maiores",
+    "idade": "8+ anos",
+    "foco": "Somar & cálculo",
+    "emoji": "🧮",
+    "cor": "from-sky-600 to-blue-700"
+  },
+  {
+    "slug": "labirinto-mestre",
+    "title": "Labirinto Mestre",
+    "subtitle": "O maior desafio da coleção",
+    "idade": "8+ anos",
+    "foco": "Foco & persistência",
+    "emoji": "🏆",
+    "cor": "from-purple-600 to-fuchsia-700"
+  }
+]
