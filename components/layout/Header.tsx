@@ -45,9 +45,17 @@ export async function Header() {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="w-full px-4 sm:px-6 lg:px-12">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="text-xl font-bold text-indigo-600 tracking-tight">
-            📚 Micro Guias
-          </Link>
+          <div className="flex items-center gap-5 sm:gap-7">
+            <Link href="/" className="text-xl font-bold text-indigo-600 tracking-tight">
+              📚 Micro Guias
+            </Link>
+            <Link
+              href="/atividades"
+              className="hidden sm:inline text-sm font-semibold text-gray-600 hover:text-indigo-600 transition-colors"
+            >
+              🖍️ Atividades grátis
+            </Link>
+          </div>
 
           <div className="flex items-center gap-4">
             {user && !isAdmin && (
